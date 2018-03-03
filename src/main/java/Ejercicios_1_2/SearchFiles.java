@@ -71,9 +71,9 @@ public class SearchFiles {
         i++;
       }
     }
-    
+    //indexReader -> leer contenidos de los campos almacenados en el indice
     IndexReader reader = DirectoryReader.open(FSDirectory.open(Paths.get(index)));
-    IndexSearcher searcher = new IndexSearcher(reader);
+    IndexSearcher searcher = new IndexSearcher(reader);	//Crea un buscador que busca el índice provisto
     Analyzer analyzer = new StandardAnalyzer();
 
     BufferedReader in = null;
@@ -82,7 +82,7 @@ public class SearchFiles {
     } else {
       in = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8));
     }
-    QueryParser parser = new QueryParser(field, analyzer);
+    QueryParser parser = new QueryParser(field, analyzer);	// constructor de la queryparser
     while (true) {
       if (queries == null && queryString == null) {                        // prompt the user
         System.out.println("Enter query: ");
@@ -99,13 +99,13 @@ public class SearchFiles {
         break;
       }
       
-      Query query = parser.parse(line);
+      Query query = parser.parse(line);	//Analiza una cadena de consulta y devuelve una consulta.
       System.out.println("Searching for: " + query.toString(field));
             
       if (repeat > 0) {                           // repeat & time as benchmark
         Date start = new Date();
         for (int i = 0; i < repeat; i++) {
-          searcher.search(query, 100);
+          searcher.search(query, 100);	//Encuentra los primeros n hits para la consulta.
         }
         Date end = new Date();
         System.out.println("Time: "+(end.getTime()-start.getTime())+"ms");
@@ -134,8 +134,9 @@ public class SearchFiles {
                                      int hitsPerPage, boolean raw, boolean interactive) throws IOException {
  
     // Collect enough docs to show 5 pages
-    TopDocs results = searcher.search(query, 5 * hitsPerPage);
-    ScoreDoc[] hits = results.scoreDocs;
+	//Constructor: TopDocs(int totalHits, ScoreDoc[] scoreDocs, float maxScore).
+    TopDocs results = searcher.search(query, 5 * hitsPerPage);	//TOPDOCS-> Esta clase representa los hits devueltos por INDEXSEARCHER.SEARCH
+    ScoreDoc[] hits = results.scoreDocs;	
     
     int numTotalHits = results.totalHits;
     System.out.println(numTotalHits + " total matching documents");

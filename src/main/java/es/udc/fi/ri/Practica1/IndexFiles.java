@@ -35,8 +35,13 @@ import Parser.Reuters21578Parser;
 
 public class IndexFiles {
 	
-	static void Indexer(String indexPath, Path docPath, String mode) {
+	static void Indexer(String indexPath, String path , String mode) {
 		//INDEXADOR
+		final Path docDir = Paths.get(path);
+	    if (!Files.isReadable(docDir)) {
+	      System.out.println("Document directory '" +docDir.toAbsolutePath()+ "' does not exist or is not readable, please check the path");
+	      System.exit(1);
+	    }
 		try {
 			System.out.println("Indexing to directory '" + indexPath + "'...");
     	
@@ -51,7 +56,7 @@ public class IndexFiles {
 				e.printStackTrace();
 			}
 	        IndexWriter writer = new IndexWriter(dir, iwc);	//inicializar indexwriter
-	        indexDocs(writer, docPath);
+	        indexDocs(writer, docDir);
 	        try {
 				writer.close();
 			} catch (CorruptIndexException e) {

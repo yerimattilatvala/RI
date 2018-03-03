@@ -72,4 +72,10 @@ public class Utils {
 			return true;
 		return false;
 	}
+	
+	static float calculateIdf(long docFreq, long docCount){
+		//log(docCount/docFreq)
+		float idf = (float) Math.log(docCount/docFreq);
+		return idf;
+	}
 }
