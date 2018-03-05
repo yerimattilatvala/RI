@@ -71,12 +71,13 @@ public class App {
 		
 		//POR COMODIDAD LOS INICIALIZARÉ MANUALMENTE
 		//openMode = "CREATE";
-		//indexPath = "C:\\Users\\yeraymendez\\Desktop\\Pruebas";
+		//indexPath = "C:\\Users\\yeraymendez\\Desktop\\Pruebass";
 		//docsPath = "C:\\Users\\yeraymendez\\Desktop\\Practica";
 		//docsPath = "C:\\Users\\yeraymendez\\Desktop\\uNA";
-		indexFile = "C:\\Users\\yeraymendez\\Desktop\\Pruebas";
-		field = "modelDescription";
-		n = 10;
+		indexFile = "C:\\Users\\yeraymendez\\Desktop\\Pruebass";
+		field = "Title";	//Topics, Body, Dateline, Date, Title
+		term = "corp";
+		//n = 10;
 		try {
 			if (indexPath !=null && openMode != null && docsPath != null && 
 					addIndexesMode == false && multiThreadMode == false) {
@@ -84,9 +85,9 @@ public class App {
 			    //System.exit(1);
 				IndexFiles.Indexer(indexPath,docsPath ,openMode);
 			} else if (indexFile != null && field != null && n > 0) {
-				ProcessIndex.bestIdfTerms(indexFile, field, n);
+				ProcessIndex.bestIdfTerms(indexFile, field, n);	//Fields -> Terms
 			} else if(indexFile != null && field != null && term != null){
-				
+				ProcessIndex.tfPos(indexFile, field, term);											// Fields -> Terms -> Posting Lists
 			}
 		} catch (Exception e) {
 			// TODO: handle exception

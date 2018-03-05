@@ -20,7 +20,7 @@ import org.apache.lucene.document.DateTools.Resolution;
 import org.apache.lucene.index.IndexWriterConfig.OpenMode;
 
 
-public class Utils {
+public class Utils {	
 	
 	// Metodo para extraer el valor de OldId y NewId del tag REUTERS
 	public static String getIds(String id, String text) {

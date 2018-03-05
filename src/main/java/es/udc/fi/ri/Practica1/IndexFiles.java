@@ -24,6 +24,7 @@ import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
 import org.apache.lucene.document.DateTools.Resolution;
 import org.apache.lucene.index.CorruptIndexException;
+import org.apache.lucene.index.IndexOptions;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.Term;
@@ -105,6 +106,8 @@ public class IndexFiles {
 			type.setStored(true);
 			type.setTokenized(true);
 			type.setStoreTermVectors(true);
+			type.setStoreTermVectorPositions(true);
+			type.setIndexOptions(IndexOptions.DOCS_AND_FREQS_AND_POSITIONS_AND_OFFSETS); //preguntar duda
 			// Add the path of the file as a field named "path".  Use a
 			// field that is indexed (i.e. searchable), but don't tokenize 
 			// the field into separate words and don't index term frequency
@@ -128,7 +131,7 @@ public class IndexFiles {
 					doc.add(new Field("Topics",fields.get(2), type));
 					doc.add(new Field("Dateline",fields.get(3), type));
 					//DATE
-					doc.add(new StringField("DATE", DateTools.dateToString(Utils.formatDate(fields.get(4)), Resolution.MILLISECOND), Field.Store.YES));	
+					doc.add(new StringField("Date", DateTools.dateToString(Utils.formatDate(fields.get(4)), Resolution.MILLISECOND), Field.Store.YES));	
 					//FALTAN INDEXAR OLDID Y NEWID
 					doc.add(new Field("OldId",fields.get(5), type));
 					doc.add(new Field("NewId",fields.get(6), type));
