@@ -2,6 +2,7 @@ package es.udc.fi.ri.Practica1;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -9,6 +10,7 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -74,72 +76,91 @@ public class IndexFiles {
 		} 
 	}
 	
-	static void indexDocs(final IndexWriter writer, Path path) throws IOException {
+	private static void indexDocs(final IndexWriter writer, Path path) throws IOException {
 		if (Files.isDirectory(path)) {
 			Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
 	        @Override
 	        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-	        	try {
-	        		if (Utils.isSgmExtension(file))
-	        			indexDoc(writer, file);
-	              } catch (IOException ignore) {
-	            	  	// don't index files that can't be read.
-	            	  	System.out.println("Error al intentar indexar el documento : "+ file.toString()+ " \n");
-	              }
+	        	if (Utils.isSgmExtension(file))
+					fileToArticle(writer, file);
 	              return FileVisitResult.CONTINUE;
 	        }
 			});
 		} else {
 			if (Utils.isSgmExtension(path))
-				indexDoc(writer, path);
+				fileToArticle(writer, path);
 	    }
 	  }
 	
+	//to extract the articles of a file.sgm
+	private static void fileToArticle(IndexWriter writer, Path file) {
+		Article article = null;
+		StringBuffer strBuffer = null;
+		try {
+			strBuffer = new StringBuffer(Utils.readFile(file.toString()));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		//INDEXAMOS EL THREAD
+		Thread thread = Thread.currentThread();
+		List<List<String>> data = Reuters21578Parser.parseString(strBuffer);
+		Iterator<List<String>> it1 = data.iterator();
+		while(it1.hasNext()) {
+			List<String> fields = it1.next();
+			try {
+				article = listArticle(fields, file.toString(),
+						InetAddress.getLocalHost().getHostName(), thread.toString(), article);
+				indexDoc(writer, article);
+			} catch (UnknownHostException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	private static Article listArticle(List<String> tags, String path, String hostname, String thread,Article article) {
+		//						Title		Topics		Body
+		article = new Article(tags.get(0), tags.get(2), tags.get(1), 
+				DateTools.dateToString(Utils.formatDate(tags.get(4)), Resolution.MILLISECOND), 
+				tags.get(3), tags.get(5), tags.get(6), path, hostname, thread);
+		//		Dateline		OldId		NewId
+		
+		return article; 
+	}
+	
 	/** Indexes a single document */
-	static void indexDoc(IndexWriter writer, Path file) throws IOException {
+	private static void indexDoc(IndexWriter writer, Article article) {
 		try {
 			// make a new, empty document
 			Document doc = new Document();
-			StringBuffer strBuffer = new StringBuffer(Utils.readFile(file.toString()));
-			List<List<String>> data = Reuters21578Parser.parseString(strBuffer);
 			FieldType type = new FieldType();
 			type.setStored(true);
-			type.setTokenized(true);
+			//type.setTokenized(true);
 			type.setStoreTermVectors(true);
-			type.setStoreTermVectorPositions(true);
-			type.setIndexOptions(IndexOptions.DOCS_AND_FREQS_AND_POSITIONS_AND_OFFSETS); //preguntar duda
+			//type.setStoreTermVectorPositions(true);
+			type.setIndexOptions(IndexOptions.DOCS_AND_FREQS_AND_POSITIONS_AND_OFFSETS);
 			// Add the path of the file as a field named "path".  Use a
 			// field that is indexed (i.e. searchable), but don't tokenize 
 			// the field into separate words and don't index term frequency
 			// or positional information:
-			Field pathField = new StringField("PathSgm", file.toString(), Field.Store.YES);
+			Field pathField = new StringField("PathSgm", article.getPath(), Field.Store.YES);
 			doc.add(pathField);
 			//INDEXAMOS EL HOST
-			Field hostName = new StringField("Hostname",InetAddress.getLocalHost().getHostName(),  Field.Store.YES);
+			Field hostName = new StringField("Hostname",article.getHostname(),  Field.Store.YES);
 			doc.add(hostName);
 			//INDEXAMOS EL THREAD
-			Thread thread = Thread.currentThread();
-			Field currentThread = new StringField("Thread",thread.toString(),  Field.Store.YES);
+			Field currentThread = new StringField("Thread", article.getThread(),  Field.Store.YES);
 			doc.add(currentThread);
-			//CREAMOS ITERADOR PARA LOS CAMPOS DEL ARTICULO
-			Iterator<List<String>> it1 = data.iterator();
-			try {
-				while(it1.hasNext()) {
-					List<String> fields = it1.next();
-					doc.add(new Field("Title",fields.get(0), type));
-					doc.add(new Field("Body",fields.get(1), type));
-					doc.add(new Field("Topics",fields.get(2), type));
-					doc.add(new Field("Dateline",fields.get(3), type));
-					//DATE
-					doc.add(new StringField("Date", DateTools.dateToString(Utils.formatDate(fields.get(4)), Resolution.MILLISECOND), Field.Store.YES));	
-					//FALTAN INDEXAR OLDID Y NEWID
-					doc.add(new Field("OldId",fields.get(5), type));
-					doc.add(new Field("NewId",fields.get(6), type));
-				}
-			} catch (Exception e) {
-				System.out.println(" caught a " + e.getClass() +
-					       "\n with message: " + e.getMessage());
-			}
+			doc.add(new Field("Title",article.getTitle(), type));
+			doc.add(new Field("Body",article.getBody(), type));
+			doc.add(new Field("Topics",article.getTopics(), type));
+			doc.add(new Field("Dateline",article.getDateline(), type));
+			//DATE
+			doc.add(new StringField("Date", article.getDate(), Field.Store.YES));	
+			//FALTAN INDEXAR OLDID Y NEWID
+			doc.add(new Field("OldId",article.getOldId(), type));
+			doc.add(new Field("NewId",article.getNewId(), type));
 			// Add the last modified date of the file a field named "modified".
 			// Use a LongPoint that is indexed (i.e. efficiently filterable with
 			// PointRangeQuery).  This indexes to milli-second resolution, which
@@ -157,14 +178,14 @@ public class IndexFiles {
 	      
 			if (writer.getConfig().getOpenMode() == OpenMode.CREATE) {
 				// New index, so we just add the document (no old document can be there):
-				System.out.println("adding " + file);
+				System.out.println("adding " + article.getPath());
 				writer.addDocument(doc);
 			} else {
 				// Existing index (an old copy of this document may have been indexed) so 
 				// we use updateDocument instead to replace the old one matching the exact 
 				// path, if present:
-				System.out.println("updating " + file);
-				writer.updateDocument(new Term("path", file.toString()), doc);
+				System.out.println("updating " + article.getPath());
+				writer.updateDocument(new Term("path", article.getPath()), doc);
 			}
 	    } catch (Exception e) {
 			// TODO: handle exception

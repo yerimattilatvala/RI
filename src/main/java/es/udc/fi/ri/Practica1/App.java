@@ -76,8 +76,8 @@ public class App {
 		//docsPath = "C:\\Users\\yeraymendez\\Desktop\\uNA";
 		indexFile = "C:\\Users\\yeraymendez\\Desktop\\Pruebass";
 		field = "Title";	//Topics, Body, Dateline, Date, Title
-		term = "corp";
-		//n = 10;
+		term = "development";
+		n = 10;
 		try {
 			if (indexPath !=null && openMode != null && docsPath != null && 
 					addIndexesMode == false && multiThreadMode == false) {

@@ -32,7 +32,10 @@ public class Utils {
 		    	  value = field;
 		     }
 		}
-		value = value.substring(id.length()+1, value.length());
+		if (id.equals("NEWID"))
+			value = value.substring(id.length()+1, value.length()-1);
+		else
+			value = value.substring(id.length()+1, value.length());
 		return value;
 	}
 	

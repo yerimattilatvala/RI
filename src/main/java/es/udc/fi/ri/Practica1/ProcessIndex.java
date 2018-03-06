@@ -50,6 +50,7 @@ public class ProcessIndex {
 			ArrayList<TermStats> terms = new ArrayList<>();
 			IndexReader reader = getIndexReader(indexFolder);
 			long numDocs = reader.numDocs();
+			System.out.println(numDocs);
 			Terms termVectors = MultiFields.getTerms(reader, field);	// permite acceder a los campos sin recorrer las hojas
 			if (termVectors ==  null){
 				System.out.println("The field ** "+ field + " ** don´t exists.");
@@ -60,7 +61,8 @@ public class ProcessIndex {
 			while(iterator.next()!=null && i<n) {
 				final String t = iterator.term().utf8ToString();
 				final long docFreq = iterator.docFreq();
-				//log(docCount/docFreq)	hacer manualmente, preguntar si es posible con clase BM25Similarity
+				System.out.println(docFreq);
+				//log(docCount/docFreq)	
 				float idf = Utils.calculateIdf(docFreq, numDocs);
 				final TermStats term = new TermStats(t, idf);
 				terms.add(term);
@@ -105,6 +107,7 @@ public class ProcessIndex {
 				System.out.println("PathSgm = " + doc.get("PathSgm"));
 				System.out.println("OldId = " + doc.get("OldId"));
 				System.out.println("NewId = " + doc.get("NewId"));
+				System.out.println("Title = " + doc.get("Title"));
 				System.out.println("["+term+"]" + " frequency in this document = " + dataTerm.freq());
 				System.out.println("["+term+"]" + " start in ["+start+"] and finish in ["+ end+"] .");
 			}
