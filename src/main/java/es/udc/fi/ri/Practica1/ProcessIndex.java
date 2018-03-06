@@ -28,11 +28,11 @@ import org.apache.lucene.util.BytesRef;
 
 public class ProcessIndex {
 
-	static private IndexReader getIndexReader(String indexFile) {
+	static private IndexReader getIndexReader(String indexFolder) {
 		Directory dir;
 		IndexReader reader = null;
 		try {
-			dir = FSDirectory.open(Paths.get(indexFile));
+			dir = FSDirectory.open(Paths.get(indexFolder));
 			reader = DirectoryReader.open(dir);	//indexReader -> leer contenidos de los campos almacenados en el indice
 		} catch (CorruptIndexException e1) {
 			System.out.println("Graceful message: exception " + e1);
@@ -96,20 +96,30 @@ public class ProcessIndex {
 		
 		bytes = new BytesRef(term);
 		indexReader = getIndexReader(indexFolder);
+		Term termAux = new Term(field,bytes);
+		int df = 0;
+		try {
+			df = indexReader.docFreq(termAux);
+		} catch (IOException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
 		try {
 			dataTerm = MultiFields.getTermDocsEnum(indexReader, field, bytes,dataTerm.ALL);
 			while (dataTerm.nextDoc() != dataTerm.NO_MORE_DOCS) {
 				int docId = dataTerm.docID();
-				int start = dataTerm.startOffset();
-				int end = dataTerm.endOffset();
+				int pos = dataTerm.nextPosition();
 				doc = indexReader.document(docId);
+				System.out.println("-------------------------------------");
 				System.out.println("DocId = " + docId);
 				System.out.println("PathSgm = " + doc.get("PathSgm"));
 				System.out.println("OldId = " + doc.get("OldId"));
 				System.out.println("NewId = " + doc.get("NewId"));
 				System.out.println("Title = " + doc.get("Title"));
-				System.out.println("["+term+"]" + " frequency in this document = " + dataTerm.freq());
-				System.out.println("["+term+"]" + " start in ["+start+"] and finish in ["+ end+"] .");
+				System.out.println("Frequency of ["+term+"]" + " in this document = " + dataTerm.freq()+" .");	//frecuencia en el documento actual
+				System.out.println("Number the documents that contain the ["+term+"] = "+df+" .");	//frecuencia del termino
+				System.out.println("Position of ["+term+"] = " + pos+" .");	//posicion
+				System.out.println("-------------------------------------");
 			}
 			
 		} catch (IOException e1) {
@@ -123,5 +133,10 @@ public class ProcessIndex {
 			System.out.println("Graceful message: exception " + e);
 			e.printStackTrace();
 		}
+	}
+
+	static void termsTfTerms1(String indexFolder,int docId,String field,int ord) {
+		IndexReader indexReader = null;
+		Document doc = null;
 	}
 }

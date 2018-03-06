@@ -27,6 +27,8 @@ public class App {
 		String field = null;
 		int n = 0;
 		String term = null;
+		int docId = -1;
+		int ord = -1;
 		
 		// Indexer options
 		for (int i = 0; i < args.length; i++) {
@@ -59,7 +61,10 @@ public class App {
 				field = args[i+1];
 				term = args[i+2];
 				break;
-			case "-termstfpos1":
+			case "-termstfpos1":		//termstfpos1 docid field ord
+				docId = Integer.parseInt(args[i+1]);
+				field = args[i+2];
+				ord = Integer.parseInt(args[i+3]);
 				break;
 			case "-termstfpos2":
 				break;
@@ -76,8 +81,8 @@ public class App {
 		//docsPath = "C:\\Users\\yeraymendez\\Desktop\\uNA";
 		indexFile = "C:\\Users\\yeraymendez\\Desktop\\Pruebass";
 		field = "Title";	//Topics, Body, Dateline, Date, Title
-		term = "development";
-		n = 10;
+		term = "CANADA";
+		//n = 10;
 		try {
 			if (indexPath !=null && openMode != null && docsPath != null && 
 					addIndexesMode == false && multiThreadMode == false) {
@@ -87,7 +92,10 @@ public class App {
 			} else if (indexFile != null && field != null && n > 0) {
 				ProcessIndex.bestIdfTerms(indexFile, field, n);	//Fields -> Terms
 			} else if(indexFile != null && field != null && term != null){
-				ProcessIndex.tfPos(indexFile, field, term);											// Fields -> Terms -> Posting Lists
+				term = term.toLowerCase();
+				ProcessIndex.tfPos(indexFile, field, term);		// Fields -> Terms -> Posting Lists
+			} else if(indexFile !=null && docId>-1 && field != null && ord>0) {
+																//termstfpos1
 			}
 		} catch (Exception e) {
 			// TODO: handle exception

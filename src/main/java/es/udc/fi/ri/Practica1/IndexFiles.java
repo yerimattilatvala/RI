@@ -123,7 +123,7 @@ public class IndexFiles {
 		//						Title		Topics		Body
 		article = new Article(tags.get(0), tags.get(2), tags.get(1), 
 				DateTools.dateToString(Utils.formatDate(tags.get(4)), Resolution.MILLISECOND), 
-				tags.get(3), tags.get(5), tags.get(6), path, hostname, thread);
+				tags.get(3), tags.get(5).toString(), tags.get(6).toString(), path, hostname, thread);
 		//		Dateline		OldId		NewId
 		
 		return article; 
@@ -136,9 +136,9 @@ public class IndexFiles {
 			Document doc = new Document();
 			FieldType type = new FieldType();
 			type.setStored(true);
-			//type.setTokenized(true);
+			type.setTokenized(true);
 			type.setStoreTermVectors(true);
-			//type.setStoreTermVectorPositions(true);
+			type.setStoreTermVectorPositions(true);
 			type.setIndexOptions(IndexOptions.DOCS_AND_FREQS_AND_POSITIONS_AND_OFFSETS);
 			// Add the path of the file as a field named "path".  Use a
 			// field that is indexed (i.e. searchable), but don't tokenize 
