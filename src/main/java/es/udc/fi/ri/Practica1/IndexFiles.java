@@ -135,11 +135,11 @@ public class IndexFiles {
 			// make a new, empty document
 			Document doc = new Document();
 			FieldType type = new FieldType();
+			type.setIndexOptions(IndexOptions.DOCS_AND_FREQS_AND_POSITIONS_AND_OFFSETS);
 			type.setStored(true);
 			type.setTokenized(true);
 			type.setStoreTermVectors(true);
 			type.setStoreTermVectorPositions(true);
-			type.setIndexOptions(IndexOptions.DOCS_AND_FREQS_AND_POSITIONS_AND_OFFSETS);
 			// Add the path of the file as a field named "path".  Use a
 			// field that is indexed (i.e. searchable), but don't tokenize 
 			// the field into separate words and don't index term frequency

@@ -76,9 +76,9 @@ public class Utils {
 		return false;
 	}
 	
-	static float calculateIdf(long docFreq, long docCount){
+	static float calculateIdf(int docFreq, int docCount){
 		//log(docCount/docFreq)
-		float idf = (float) Math.log(docCount/docFreq);
+		float idf = (float) Math.log10(docCount/docFreq);
 		return idf;
 	}
 }

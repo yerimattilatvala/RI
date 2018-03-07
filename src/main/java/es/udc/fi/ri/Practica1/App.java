@@ -80,9 +80,12 @@ public class App {
 		//docsPath = "C:\\Users\\yeraymendez\\Desktop\\Practica";
 		//docsPath = "C:\\Users\\yeraymendez\\Desktop\\uNA";
 		indexFile = "C:\\Users\\yeraymendez\\Desktop\\Pruebass";
-		field = "Title";	//Topics, Body, Dateline, Date, Title
-		term = "CANADA";
-		//n = 10;
+		field = "Body";	//Topics, Body, Dateline, Date, Title
+		//term = "CANADA";
+		//n = 100;
+		docId = 1;
+		//field = "Title";
+		ord = 2;
 		try {
 			if (indexPath !=null && openMode != null && docsPath != null && 
 					addIndexesMode == false && multiThreadMode == false) {
@@ -95,7 +98,7 @@ public class App {
 				term = term.toLowerCase();
 				ProcessIndex.tfPos(indexFile, field, term);		// Fields -> Terms -> Posting Lists
 			} else if(indexFile !=null && docId>-1 && field != null && ord>0) {
-																//termstfpos1
+				ProcessIndex.termsTfTerms1(indexFile, docId, field, ord);												//termstfpos1
 			}
 		} catch (Exception e) {
 			// TODO: handle exception
