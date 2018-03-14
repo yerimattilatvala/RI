@@ -135,17 +135,65 @@ public class ProcessIndex {
 
 	static void termsTfTerms1(String indexFolder,int docId,String field,int ord) {
 		IndexReader indexReader = null;
+		ArrayList<TermStats> termList = null;
 		Document doc = null;
 		Terms termField = null;
+		try {
+			indexReader = getIndexReader(indexFolder);
+			termField = indexReader.getTermVector(docId, field);
+			doc = indexReader.document(docId);
+			termList = getTermsByFieldAndDoc(indexReader, termField, field, docId);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		selectOrd(doc, termList, ord);
+		try {
+			indexReader.close();
+		} catch (IOException e) {
+			System.out.println("Graceful message: exception " + e);
+			e.printStackTrace();
+		}
+	}
+	
+	static void termsTfTerms2(String indexFolder, String pathSgm, String newId, String field, int ord) {
+		IndexReader indexReader = null;
+		Document doc = null;
+		ArrayList<TermStats> termList = null;
+		Terms termField = null;
+		try {
+			indexReader = getIndexReader(indexFolder);
+			for (int i = 0; i < indexReader.maxDoc(); i++) {
+				if ( (indexReader.document(i).get("PathSgm").equals(pathSgm)) && (indexReader.document(i).get("NewId").equals(newId))) {
+					termField = indexReader.getTermVector(i, field);
+					doc = indexReader.document(i);
+					termList = getTermsByFieldAndDoc(indexReader, termField, field, i);
+				}
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		selectOrd(doc, termList, ord);
+		try {
+			indexReader.close();
+		} catch (IOException e) {
+			System.out.println("Graceful message: exception " + e);
+			e.printStackTrace();
+		}
+	}
+	
+	private static ArrayList<TermStats> getTermsByFieldAndDoc(IndexReader indexReader,Terms termField, String field, int docId){
 		TermsEnum iterator = null;
 		PostingsEnum posting= null;
 		ArrayList<TermStats> termList = new ArrayList<>();
-		
-		indexReader = getIndexReader(indexFolder);
 		try {
-			termField = indexReader.getTermVector(docId, field);
-			doc = indexReader.document(docId);
 			iterator = termField.iterator();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
 			while(iterator.next()!=null) {
 				final String t = iterator.term().utf8ToString();
 				final int tf = iterator.docFreq();	// frecuencia del termino en el documento actual
@@ -162,6 +210,10 @@ public class ProcessIndex {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		return termList;
+	}
+	
+	private static void selectOrd(Document doc, ArrayList<TermStats> termList, int ord) {
 		switch (ord) {
 		case 0:
 			System.out.println("Alphabetical sort...");
@@ -180,12 +232,6 @@ public class ProcessIndex {
 			System.out.println("Predefined sort: Alphabetical");
 			printListOrd(doc, termList, true, false, false);
 			break;
-		}
-		try {
-			indexReader.close();
-		} catch (IOException e) {
-			System.out.println("Graceful message: exception " + e);
-			e.printStackTrace();
 		}
 	}
 	

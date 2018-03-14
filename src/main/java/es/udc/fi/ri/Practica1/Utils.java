@@ -33,9 +33,9 @@ public class Utils {
 		     }
 		}
 		if (id.equals("NEWID"))
-			value = value.substring(id.length()+1, value.length()-1);
+			value = value.substring(id.length()+2, value.length()-2);
 		else
-			value = value.substring(id.length()+1, value.length());
+			value = value.substring(id.length()+2, value.length()-1);
 		return value;
 	}
 	

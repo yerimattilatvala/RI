@@ -25,10 +25,12 @@ public class App {
 		//PROCESADO
 		String indexFile = null;
 		String field = null;
-		int n = 0;
 		String term = null;
+		String pathSgm = null;
+		String newId = null;
 		int docId = -1;
 		int ord = -1;
+		int n = 0;
 		
 		// Indexer options
 		for (int i = 0; i < args.length; i++) {
@@ -67,6 +69,10 @@ public class App {
 				ord = Integer.parseInt(args[i+3]);
 				break;
 			case "-termstfpos2":
+				pathSgm = args[i+1];
+				newId = args[i+2];
+				field = args[i+3];
+				ord = Integer.parseInt(args[i+4]);
 				break;
 			// OPCIONES DE PROCESADO Y CONSTRUCCION DE NUEVO INDICE
 			default:
@@ -80,12 +86,15 @@ public class App {
 		//docsPath = "C:\\Users\\yeraymendez\\Desktop\\Practica";
 		//docsPath = "C:\\Users\\yeraymendez\\Desktop\\uNA";
 		indexFile = "C:\\Users\\yeraymendez\\Desktop\\Pruebass";
-		field = "Body";	//Topics, Body, Dateline, Date, Title
+		//field = "Body";	//Topics, Body, Dateline, Date, Title
 		//term = "CANADA";
 		//n = 100;
-		docId = 1;
-		//field = "Title";
-		ord = 2;
+		//docId = 1;
+		field = "Title";
+		pathSgm = "C:\\Users\\yeraymendez\\Desktop\\uNA\\reut2-021.sgm";
+		pathSgm.replaceAll("\\\\", "\\\\\\\\");
+		newId = "21001";
+		ord = 0;
 		try {
 			if (indexPath !=null && openMode != null && docsPath != null && 
 					addIndexesMode == false && multiThreadMode == false) {
@@ -97,8 +106,10 @@ public class App {
 			} else if(indexFile != null && field != null && term != null){
 				term = term.toLowerCase();
 				ProcessIndex.tfPos(indexFile, field, term);		// Fields -> Terms -> Posting Lists
-			} else if(indexFile !=null && docId>-1 && field != null && ord>0) {
+			} else if(indexFile !=null && docId>-1 && field != null && ord>=0) {
 				ProcessIndex.termsTfTerms1(indexFile, docId, field, ord);												//termstfpos1
+			}else if(indexFile !=null && pathSgm != null  && newId != null && ord>=0) {
+				ProcessIndex.termsTfTerms2(indexFile, pathSgm, newId,field,ord);												//termstfpos1
 			}
 		} catch (Exception e) {
 			// TODO: handle exception
