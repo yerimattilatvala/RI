@@ -120,12 +120,9 @@ public class IndexFiles {
 	}
 	
 	private static Article listArticle(List<String> tags, String path, String hostname, String thread,Article article) {
-		//						Title		Topics		Body
 		article = new Article(tags.get(0), tags.get(2), tags.get(1), 
-				DateTools.dateToString(Utils.formatDate(tags.get(4)), Resolution.MILLISECOND), 
-				tags.get(3), tags.get(5).toString(), tags.get(6).toString(), path, hostname, thread);
-		//		Dateline		OldId		NewId
-		
+			DateTools.dateToString(Utils.formatDate(tags.get(4)), Resolution.MILLISECOND), 
+			tags.get(3), tags.get(5).toString(), tags.get(6).toString(), path, hostname, thread);
 		return article; 
 	}
 	

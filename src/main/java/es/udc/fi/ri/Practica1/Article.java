@@ -18,6 +18,7 @@ public class Article {
 		this.thread = thread;
 	}
 
+
 	public String getTitle() {
 		return title;
 	}
@@ -57,7 +58,4 @@ public class Article {
 	public String getThread() {
 		return thread;
 	}
-	
-	
-
 }

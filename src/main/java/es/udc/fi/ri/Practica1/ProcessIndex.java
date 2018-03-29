@@ -28,28 +28,12 @@ import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.BytesRef;
 
 public class ProcessIndex {
-
-	static private IndexReader getIndexReader(String indexFolder) {
-		Directory dir;
-		IndexReader reader = null;
-		try {
-			dir = FSDirectory.open(Paths.get(indexFolder));
-			reader = DirectoryReader.open(dir);	//indexReader -> leer contenidos de los campos almacenados en el indice
-		} catch (CorruptIndexException e1) {
-			System.out.println("Graceful message: exception " + e1);
-			e1.printStackTrace();
-		} catch (IOException e1) {
-			System.out.println("Graceful message: exception " + e1);
-			e1.printStackTrace();
-		}
-		return reader;
-	}
 	
 	static void bestIdfTerms(String indexFolder, String field, int n) {
 		
 		try {
 			ArrayList<TermStats> terms = new ArrayList<>();
-			IndexReader reader = getIndexReader(indexFolder);
+			IndexReader reader = Utils.getIndexReader(indexFolder);
 			int numDocs = reader.numDocs();
 			Terms termVectors = MultiFields.getTerms(reader, field);	// permite acceder a los campos sin recorrer las hojas
 			if (termVectors ==  null){
@@ -67,10 +51,10 @@ public class ProcessIndex {
 				i++;
 			}
 			
-			terms.sort(Comparator.comparing(TermStats::getIdf).reversed());	//asi las muestra de mayor a menor
+			terms.sort(Comparator.comparing(TermStats::getIdf));	
 			
 			for (int j = 0; j < terms.size(); j++)
-				System.out.println("- Idf : "+ terms.get(j).getIdf() + "  Term : "+ terms.get(j).getTerm());
+				System.out.println("- Order "+(j+1)+" -> Idf : "+ terms.get(j).getIdf() + "  Term : "+ terms.get(j).getTerm());
 			
 			reader.close();
 			
@@ -93,7 +77,7 @@ public class ProcessIndex {
 		Document doc = null;
 		
 		bytes = new BytesRef(term);
-		indexReader = getIndexReader(indexFolder);
+		indexReader = Utils.getIndexReader(indexFolder);
 		Term termAux = new Term(field,bytes);
 		int df = 0;
 		try {
@@ -139,7 +123,7 @@ public class ProcessIndex {
 		Document doc = null;
 		Terms termField = null;
 		try {
-			indexReader = getIndexReader(indexFolder);
+			indexReader = Utils.getIndexReader(indexFolder);
 			termField = indexReader.getTermVector(docId, field);
 			doc = indexReader.document(docId);
 			termList = getTermsByFieldAndDoc(indexReader, termField, field, docId);
@@ -162,7 +146,7 @@ public class ProcessIndex {
 		ArrayList<TermStats> termList = null;
 		Terms termField = null;
 		try {
-			indexReader = getIndexReader(indexFolder);
+			indexReader = Utils.getIndexReader(indexFolder);
 			for (int i = 0; i < indexReader.maxDoc(); i++) {
 				if ( (indexReader.document(i).get("PathSgm").equals(pathSgm)) && (indexReader.document(i).get("NewId").equals(newId))) {
 					termField = indexReader.getTermVector(i, field);
@@ -236,7 +220,6 @@ public class ProcessIndex {
 	}
 	
 	private static void printListOrd(Document doc,ArrayList<TermStats> terms,Boolean alpha,Boolean tf,Boolean df) {
-		
 		if (alpha == true) {
 			terms.sort(Comparator.comparing(TermStats::getTerm));
 		} else if (tf == true) {
@@ -244,7 +227,6 @@ public class ProcessIndex {
 		} else if (df == true) {
 			terms.sort(Comparator.comparing(TermStats::getDf).reversed());
 		}
-		
 		for (int i = 0; i < terms.size(); i++) {
 			System.out.println("-------------------------------------");
 			System.out.println("Term = "+ terms.get(i).getTerm()+" .");

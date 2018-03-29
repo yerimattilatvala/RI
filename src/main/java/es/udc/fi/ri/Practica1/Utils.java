@@ -17,7 +17,12 @@ import org.apache.lucene.document.DateTools;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.DateTools.Resolution;
+import org.apache.lucene.index.CorruptIndexException;
+import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriterConfig.OpenMode;
+import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.FSDirectory;
 
 
 public class Utils {	
@@ -59,7 +64,7 @@ public class Utils {
 		case "CREATE_OR_APPEND":
 			return OpenMode.CREATE_OR_APPEND;	
 		default:
-			 throw new Exception("Introduzca un modo válido");
+			 throw new Exception("Select a valid mode");
 		}
 	}
 	
@@ -80,5 +85,21 @@ public class Utils {
 		//log(docCount/docFreq)
 		float idf = (float) Math.log10(docCount/docFreq);
 		return idf;
+	}
+	
+	static IndexReader getIndexReader(String indexFolder) {
+		Directory dir;
+		IndexReader reader = null;
+		try {
+			dir = FSDirectory.open(Paths.get(indexFolder));
+			reader = DirectoryReader.open(dir);	//indexReader -> leer contenidos de los campos almacenados en el indice
+		} catch (CorruptIndexException e1) {
+			System.out.println("Graceful message: exception " + e1);
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			System.out.println("Graceful message: exception " + e1);
+			e1.printStackTrace();
+		}
+		return reader;
 	}
 }
