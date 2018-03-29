@@ -86,20 +86,4 @@ public class Utils {
 		float idf = (float) Math.log10(docCount/docFreq);
 		return idf;
 	}
-	
-	static IndexReader getIndexReader(String indexFolder) {
-		Directory dir;
-		IndexReader reader = null;
-		try {
-			dir = FSDirectory.open(Paths.get(indexFolder));
-			reader = DirectoryReader.open(dir);	//indexReader -> leer contenidos de los campos almacenados en el indice
-		} catch (CorruptIndexException e1) {
-			System.out.println("Graceful message: exception " + e1);
-			e1.printStackTrace();
-		} catch (IOException e1) {
-			System.out.println("Graceful message: exception " + e1);
-			e1.printStackTrace();
-		}
-		return reader;
-	}
 }

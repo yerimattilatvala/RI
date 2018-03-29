@@ -1,5 +1,7 @@
 package es.udc.fi.ri.Practica1;
 
+import java.util.Comparator;
+
 public class TermStats {
 	private String term;
 	private float idf;
@@ -46,5 +48,4 @@ public class TermStats {
 	public float getIdf() {
 		return idf;
 	}
-	
 }

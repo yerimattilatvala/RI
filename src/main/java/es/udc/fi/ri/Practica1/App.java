@@ -101,9 +101,9 @@ public class App {
 		//docsPath = "C:\\Users\\yeraymendez\\Desktop\\Practica";
 		//docsPath = "C:\\Users\\yeraymendez\\Desktop\\uNA";
 		indexFile = "C:\\Users\\yeraymendez\\Desktop\\Pruebass";
-		//field = "Body";	//Topics, Body, Dateline, Date, Title
+		field = "Title";	//Topics, Body, Dateline, Date, Title
 		//term = "CANADA";
-		//n = 1000;
+		n = 5;
 		//docId = 1;
 		//field = "Title";
 		//pathSgm = "C:\\Users\\yeraymendez\\Desktop\\uNA\\reut2-021.sgm";

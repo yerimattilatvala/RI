@@ -29,11 +29,26 @@ import org.apache.lucene.util.BytesRef;
 
 public class ProcessIndex {
 	
+	static IndexReader getIndexReader(String indexFolder) {
+		Directory dir;
+		IndexReader reader = null;
+		try {
+			dir = FSDirectory.open(Paths.get(indexFolder));
+			reader = DirectoryReader.open(dir);	//indexReader -> leer contenidos de los campos almacenados en el indice
+		} catch (CorruptIndexException e1) {
+			System.out.println("Graceful message: exception " + e1);
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			System.out.println("Graceful message: exception " + e1);
+			e1.printStackTrace();
+		}
+		return reader;
+	}
+	
 	static void bestIdfTerms(String indexFolder, String field, int n) {
-		
 		try {
 			ArrayList<TermStats> terms = new ArrayList<>();
-			IndexReader reader = Utils.getIndexReader(indexFolder);
+			IndexReader reader = getIndexReader(indexFolder);
 			int numDocs = reader.numDocs();
 			Terms termVectors = MultiFields.getTerms(reader, field);	// permite acceder a los campos sin recorrer las hojas
 			if (termVectors ==  null){
@@ -41,7 +56,7 @@ public class ProcessIndex {
 			}
 			int i = 0;
 			final TermsEnum iterator = termVectors.iterator();
-			while(iterator.next()!=null && i<n) {
+			while(iterator.next()!=null) {
 				final String t = iterator.term().utf8ToString();
 				final int docFreq = iterator.docFreq();
 				//log(docCount/docFreq)	
@@ -53,9 +68,8 @@ public class ProcessIndex {
 			
 			terms.sort(Comparator.comparing(TermStats::getIdf));	
 			
-			for (int j = 0; j < terms.size(); j++)
+			for (int j = 0; j < n; j++)
 				System.out.println("- Order "+(j+1)+" -> Idf : "+ terms.get(j).getIdf() + "  Term : "+ terms.get(j).getTerm());
-			
 			reader.close();
 			
 		} catch (CorruptIndexException e1) {
@@ -75,18 +89,12 @@ public class ProcessIndex {
 		PostingsEnum dataTerm = null;
 		BytesRef bytes = null;
 		Document doc = null;
-		
-		bytes = new BytesRef(term);
-		indexReader = Utils.getIndexReader(indexFolder);
-		Term termAux = new Term(field,bytes);
-		int df = 0;
 		try {
+			bytes = new BytesRef(term);
+			indexReader = getIndexReader(indexFolder);
+			Term termAux = new Term(field,bytes);
+			int df = 0;
 			df = indexReader.docFreq(termAux);
-		} catch (IOException e2) {
-			// TODO Auto-generated catch block
-			e2.printStackTrace();
-		}
-		try {
 			dataTerm = MultiFields.getTermDocsEnum(indexReader, field, bytes,PostingsEnum.ALL);
 			while (dataTerm.nextDoc() != DocIdSetIterator.NO_MORE_DOCS) {
 				int docId = dataTerm.docID();
@@ -103,17 +111,11 @@ public class ProcessIndex {
 				System.out.println("Position of ["+term+"] = " + pos+" .");	//posicion
 				System.out.println("-------------------------------------");
 			}
+			indexReader.close();
 			
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
-		}
-		
-		try {
-			indexReader.close();
-		} catch (IOException e) {
-			System.out.println("Graceful message: exception " + e);
-			e.printStackTrace();
 		}
 	}
 
@@ -122,22 +124,18 @@ public class ProcessIndex {
 		ArrayList<TermStats> termList = null;
 		Document doc = null;
 		Terms termField = null;
+		
 		try {
-			indexReader = Utils.getIndexReader(indexFolder);
+			indexReader = getIndexReader(indexFolder);
 			termField = indexReader.getTermVector(docId, field);
 			doc = indexReader.document(docId);
 			termList = getTermsByFieldAndDoc(indexReader, termField, field, docId);
+			indexReader.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		selectOrd(doc, termList, ord);
-		try {
-			indexReader.close();
-		} catch (IOException e) {
-			System.out.println("Graceful message: exception " + e);
-			e.printStackTrace();
-		}
 	}
 	
 	static void termsTfTerms2(String indexFolder, String pathSgm, String newId, String field, int ord) {
@@ -146,7 +144,7 @@ public class ProcessIndex {
 		ArrayList<TermStats> termList = null;
 		Terms termField = null;
 		try {
-			indexReader = Utils.getIndexReader(indexFolder);
+			indexReader = getIndexReader(indexFolder);
 			for (int i = 0; i < indexReader.maxDoc(); i++) {
 				if ( (indexReader.document(i).get("PathSgm").equals(pathSgm)) && (indexReader.document(i).get("NewId").equals(newId))) {
 					termField = indexReader.getTermVector(i, field);
@@ -173,11 +171,6 @@ public class ProcessIndex {
 		ArrayList<TermStats> termList = new ArrayList<>();
 		try {
 			iterator = termField.iterator();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		try {
 			while(iterator.next()!=null) {
 				final String t = iterator.term().utf8ToString();
 				final int tf = iterator.docFreq();	// frecuencia del termino en el documento actual
