@@ -1,9 +1,5 @@
 package es.udc.fi.ri.Practica1;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
 public class App {
 	public static void main(String[] args) {
 		String usage = "Indexer use "
@@ -96,14 +92,15 @@ public class App {
 			}
 		}
 		//POR COMODIDAD LOS INICIALIZARÉ MANUALMENTE
-		//openMode = "CREATE";
-		//indexPath = "C:\\Users\\yeraymendez\\Desktop\\Pruebass";
+		openMode = "CREATE";
+		indexPath = "C:\\Users\\yeraymendez\\Desktop\\Pruebass2";
 		//docsPath = "C:\\Users\\yeraymendez\\Desktop\\Practica";
-		//docsPath = "C:\\Users\\yeraymendez\\Desktop\\uNA";
-		indexFile = "C:\\Users\\yeraymendez\\Desktop\\Pruebass";
-		field = "Title";	//Topics, Body, Dateline, Date, Title
+		docsPath = "C:\\Users\\yeraymendez\\Desktop\\dos";
+		//indexFile = "C:\\Users\\yeraymendez\\Desktop\\Pruebass";
+		addIndexesMode = true;
+		//field = "Title";	//Topics, Body, Dateline, Date, Title
 		//term = "CANADA";
-		n = 5;
+		//n = 5;
 		//docId = 1;
 		//field = "Title";
 		//pathSgm = "C:\\Users\\yeraymendez\\Desktop\\uNA\\reut2-021.sgm";
@@ -111,14 +108,13 @@ public class App {
 		//newId = "21001";
 		//ord = 0;
 		//term = "abe";
-		summariesMode = true;
-		indexOut = "C:\\Users\\yeraymendez\\Desktop\\Pruebass3";
+		//summariesMode = true;
+		//indexOut = "C:\\Users\\yeraymendez\\Desktop\\Pruebass3";
 		try {
-			if (indexPath !=null && openMode != null && docsPath != null && 
-					addIndexesMode == false && multiThreadMode == false) {
+			if (indexPath !=null && openMode != null && docsPath != null) {
 				//System.err.println("Usage: " + usage);
 			    //System.exit(1);
-				IndexFiles.Indexer(indexPath,docsPath ,openMode);
+				IndexFiles.Indexer(indexPath,docsPath ,openMode,addIndexesMode,multiThreadMode);
 			} else if (indexFile != null && field != null && n > 0) {
 				ProcessIndex.bestIdfTerms(indexFile, field, n);	//Fields -> Terms
 			} //else if(indexFile != null && field != null && term != null){

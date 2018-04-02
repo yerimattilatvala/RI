@@ -217,9 +217,16 @@ public class ConstructIndexFromIndex {
 			Query query = parser.parse(QueryParser.escape(title));
 			topDocs = indexSearcher.search(query, 2);
 			if (topDocs.scoreDocs.length>0) {
+				System.out.println("****************************************************");
+				System.out.println(title);
+				System.out.println("-------------------------------------------");
 				for (int i = 0; i < topDocs.scoreDocs.length; i++) {
+					System.out.println("Score = "+ topDocs.scoreDocs[i].score);
+					System.out.println("Phrase = "+indexReader.document(topDocs.scoreDocs[i].doc).get("Body"));
 					summary += indexSearcher.doc(topDocs.scoreDocs[i].doc).get("Body")+"\n";
+					System.out.println("-------------------------------------------");
 				}
+				System.out.println("****************************************************");
 			}
 			else {
 				summary = "";

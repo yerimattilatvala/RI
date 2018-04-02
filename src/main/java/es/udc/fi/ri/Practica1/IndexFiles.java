@@ -1,5 +1,6 @@
 package es.udc.fi.ri.Practica1;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -15,6 +16,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.regex.Pattern;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -38,8 +40,19 @@ import Parser.Reuters21578Parser;
 
 public class IndexFiles {
 	
-	static void Indexer(String indexPath, String path , String mode) {
-		//INDEXADOR
+	static void Indexer(String indexPath, String path , String mode, boolean addIndexes, boolean multiThread) {
+		if (addIndexes && multiThread) {
+			//opcion add y multi
+		} else if (addIndexes) {
+			addIndexesIndexing(indexPath, path, mode);
+		} else if (multiThread) {
+			// multi
+		} else {
+			simpleIndexing(indexPath, path, mode);
+		}
+	}
+	
+	private static void simpleIndexing(String indexPath, String path , String mode){
 		final Path docDir = Paths.get(path);
 	    if (!Files.isReadable(docDir)) {
 	      System.out.println("Document directory '" +docDir.toAbsolutePath()+ "' does not exist or is not readable, please check the path");
@@ -47,33 +60,96 @@ public class IndexFiles {
 	    }
 		try {
 			System.out.println("Indexing to directory '" + indexPath + "'...");
-    	
 			Directory dir = FSDirectory.open(Paths.get(indexPath)); //abre ruta para almacenar los indices
-		
 	        Analyzer analyzer = new StandardAnalyzer(); //analizador
 	        IndexWriterConfig iwc = new IndexWriterConfig(analyzer); //establece configuracion para determinar modelo de indexacion
-	        try {
-				iwc.setOpenMode(Utils.getOpenMode(mode));	//modo de crear el indice
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+	        iwc.setOpenMode(Utils.getOpenMode(mode));	//modo de crear el indice
 	        IndexWriter writer = new IndexWriter(dir, iwc);	//inicializar indexwriter
 	        indexDocs(writer, docDir);
-	        try {
-				writer.close();
-			} catch (CorruptIndexException e) {
-				System.out.println("Graceful message: exception " + e);
-				e.printStackTrace();
-			} catch (IOException e) {
-				System.out.println("Graceful message: exception " + e);
-				e.printStackTrace();
-			}
-	        
+			writer.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
 		} 
+	}
+	
+	private static void addIndexesIndexing(String indexPath, String path , String mode) {
+		final Path docDir = Paths.get(path);
+	    if (!Files.isReadable(docDir)) {
+	      System.out.println("Document directory '" +docDir.toAbsolutePath()+ "' does not exist or is not readable, please check the path");
+	      System.exit(1);
+	    }
+	    try {
+	    	int j = indexBySubFolders(docDir, mode, indexPath);
+			String folderIndex = indexPath+"\\FinalIndex";
+			//abre ruta para almacenar los indices
+	        Analyzer analyzer = new StandardAnalyzer(); //analizador
+	        IndexWriterConfig iwc = new IndexWriterConfig(analyzer); //establece configuracion para determinar modelo de indexacion
+	        iwc.setOpenMode(Utils.getOpenMode(mode));
+	        Directory[] directories = obtainPartialIndex(Paths.get(indexPath),j);
+	        new File(folderIndex).mkdir();
+	        Directory dir = FSDirectory.open(Paths.get(folderIndex)); 
+	        System.out.println("INDICE ->"+folderIndex);
+	        IndexWriter indexWriter = new IndexWriter(dir, iwc);
+	        indexWriter.addIndexes(directories);
+	        indexWriter.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	private static Directory[] obtainPartialIndex(Path path, int nFolders) throws IOException{
+		Directory [] directories = new Directory[nFolders];
+		int i = 0;
+		if (Files.isDirectory(path)) {
+			File[] files = new File(path.toString()).listFiles();
+			/*for (int j = 0; j < files.length; j++) {
+				System.out.println(files[j]);
+			}
+			System.out.println("---------------");*/
+			for (File file : files) {
+				if (file.isDirectory()) {
+	        		System.out.println(file.toString());
+	        		directories[i] = FSDirectory.open(file.toPath());
+	        		i++;
+	        	}
+			}
+		}
+		return directories;
+	}
+	
+	private static int indexBySubFolders(Path path, String mode, String indexPath) throws IOException {
+		int i = 0;
+		if (Files.isDirectory(path)) {
+			File[] files = new File(path.toString()).listFiles();
+			for (int j = 0; j < files.length; j++) {
+				System.out.println(files[j]);
+			}
+			System.out.println("********");
+			for (File file : files) {
+				if (file.isDirectory()) {
+					i++;
+	        		//System.out.println(file.toString());
+	        		String[] parts = file.toString().split(Pattern.quote(File.separator));
+	        		String folder= parts[parts.length-1]; 
+	        		//System.out.println(folder);
+	        		String newFolder = indexPath+"\\"+folder;
+	        		System.out.println("NEWFOLDER->"+newFolder);
+	        		boolean newFile = new File(newFolder).mkdir();
+	        		if (newFile) {
+	        			simpleIndexing(newFolder, file.toString(), mode);
+	        		}
+				}
+			}
+		}
+		return i;
 	}
 	
 	private static void indexDocs(final IndexWriter writer, Path path) throws IOException {
@@ -83,7 +159,7 @@ public class IndexFiles {
 	        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 	        	if (Utils.isSgmExtension(file))
 					fileToArticle(writer, file);
-	              return FileVisitResult.CONTINUE;
+	            return FileVisitResult.CONTINUE;
 	        }
 			});
 		} else {
@@ -102,7 +178,7 @@ public class IndexFiles {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		//INDEXAMOS EL THREAD
+		// THREAD
 		Thread thread = Thread.currentThread();
 		List<List<String>> data = Reuters21578Parser.parseString(strBuffer);
 		Iterator<List<String>> it1 = data.iterator();
@@ -129,7 +205,6 @@ public class IndexFiles {
 	/** Indexes a single document */
 	private static void indexDoc(IndexWriter writer, Article article) {
 		try {
-			// make a new, empty document
 			Document doc = new Document();
 			FieldType type = new FieldType();
 			type.setIndexOptions(IndexOptions.DOCS_AND_FREQS_AND_POSITIONS_AND_OFFSETS);
@@ -137,10 +212,6 @@ public class IndexFiles {
 			type.setTokenized(true);
 			type.setStoreTermVectors(true);
 			type.setStoreTermVectorPositions(true);
-			// Add the path of the file as a field named "path".  Use a
-			// field that is indexed (i.e. searchable), but don't tokenize 
-			// the field into separate words and don't index term frequency
-			// or positional information:
 			Field pathField = new StringField("PathSgm", article.getPath(), Field.Store.YES);
 			doc.add(pathField);
 			//INDEXAMOS EL HOST
@@ -155,33 +226,15 @@ public class IndexFiles {
 			doc.add(new Field("Dateline",article.getDateline(), type));
 			//DATE
 			doc.add(new StringField("Date", article.getDate(), Field.Store.YES));	
-			//FALTAN INDEXAR OLDID Y NEWID
+			//INDEXAR OLDID Y NEWID
 			doc.add(new Field("OldId",article.getOldId(), type));
 			doc.add(new Field("NewId",article.getNewId(), type));
-			// Add the last modified date of the file a field named "modified".
-			// Use a LongPoint that is indexed (i.e. efficiently filterable with
-			// PointRangeQuery).  This indexes to milli-second resolution, which
-			// is often too fine.  You could instead create a number based on
-			// year/month/day/hour/minutes/seconds, down the resolution you require.
-			// For example the long value 2011021714 would mean
-			// February 17, 2011, 2-3 PM.
-			//doc.add(new LongPoint("modified", lastModified));
-	      
-			// Add the contents of the file to a field named "contents".  Specify a Reader,
-			// so that the text of the file is tokenized and indexed, but not stored.
-			// Note that FileReader expects the file to be in UTF-8 encoding.
-			// If that's not the case searching for special characters will fail.
-			//doc.add(new TextField("contents", new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8))));
 	      
 			if (writer.getConfig().getOpenMode() == OpenMode.CREATE) {
-				// New index, so we just add the document (no old document can be there):
-				System.out.println("adding " + article.getPath());
+				//System.out.println("adding " + article.getPath());
 				writer.addDocument(doc);
 			} else {
-				// Existing index (an old copy of this document may have been indexed) so 
-				// we use updateDocument instead to replace the old one matching the exact 
-				// path, if present:
-				System.out.println("updating " + article.getPath());
+				//System.out.println("updating " + article.getPath());
 				writer.updateDocument(new Term("path", article.getPath()), doc);
 			}
 	    } catch (Exception e) {
