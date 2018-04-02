@@ -1,10 +1,11 @@
 package es.udc.fi.ri.Practica1;
 
 public class Article {
-	private String title,topics,body,date,dateline,oldId,newId,path,hostname,thread;
+	private String title,topics,body,date,dateline,oldId,newId,path,hostname;
+	private long thread;
 
 	public Article(String title, String topics, String body, String date, String dateline, String oldId, String newId,
-			String path, String hostname, String thread) {
+			String path, String hostname, long thread) {
 		super();
 		this.title = title;
 		this.topics = topics;
@@ -55,7 +56,7 @@ public class Article {
 		return hostname;
 	}
 
-	public String getThread() {
+	public long getThread() {
 		return thread;
 	}
 }

@@ -42,31 +42,52 @@ public class IndexFiles {
 	
 	static void Indexer(String indexPath, String path , String mode, boolean addIndexes, boolean multiThread) {
 		if (addIndexes && multiThread) {
-			//opcion add y multi
+			addAndMultiThreadIndexing(indexPath, path, mode);
 		} else if (addIndexes) {
 			addIndexesIndexing(indexPath, path, mode);
 		} else if (multiThread) {
-			// multi
+			onlyMultiThreadIndexing(indexPath, path, mode);
 		} else {
-			simpleIndexing(indexPath, path, mode);
+			IndexWriter indexWriter = getIndexWriter(indexPath, mode);
+			simpleIndexing(path, indexWriter);
+			try {
+				indexWriter.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 	
-	private static void simpleIndexing(String indexPath, String path , String mode){
+	public static IndexWriter getIndexWriter(String indexPath, String mode) {
+		Directory dir;
+		IndexWriter writer = null;
+		try {
+			dir = FSDirectory.open(Paths.get(indexPath));//abre ruta para almacenar los indices
+	        Analyzer analyzer = new StandardAnalyzer(); //analizador
+	        IndexWriterConfig iwc = new IndexWriterConfig(analyzer); //establece configuracion para determinar modelo de indexacion
+	        iwc.setOpenMode(Utils.getOpenMode(mode));	//modo de crear el indice
+	        writer = new IndexWriter(dir, iwc);	//inicializar indexwriter
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+		return writer;
+	}
+	
+	public static void simpleIndexing(String path , IndexWriter indexWriter){
 		final Path docDir = Paths.get(path);
 	    if (!Files.isReadable(docDir)) {
 	      System.out.println("Document directory '" +docDir.toAbsolutePath()+ "' does not exist or is not readable, please check the path");
 	      System.exit(1);
 	    }
 		try {
-			System.out.println("Indexing to directory '" + indexPath + "'...");
-			Directory dir = FSDirectory.open(Paths.get(indexPath)); //abre ruta para almacenar los indices
-	        Analyzer analyzer = new StandardAnalyzer(); //analizador
-	        IndexWriterConfig iwc = new IndexWriterConfig(analyzer); //establece configuracion para determinar modelo de indexacion
-	        iwc.setOpenMode(Utils.getOpenMode(mode));	//modo de crear el indice
-	        IndexWriter writer = new IndexWriter(dir, iwc);	//inicializar indexwriter
-	        indexDocs(writer, docDir);
-			writer.close();
+			//System.out.println("Indexing to directory '" + indexWriter.getDirectory().toString() + "'...");
+	        indexDocs(indexWriter, docDir);
+	        
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -84,22 +105,54 @@ public class IndexFiles {
 	    }
 	    try {
 	    	int j = indexBySubFolders(docDir, mode, indexPath);
-	    	System.out.println(j);
 			String folderIndex = indexPath+"\\FinalIndex";
-			//abre ruta para almacenar los indices
-	        Analyzer analyzer = new StandardAnalyzer(); //analizador
-	        IndexWriterConfig iwc = new IndexWriterConfig(analyzer); //establece configuracion para determinar modelo de indexacion
-	        iwc.setOpenMode(Utils.getOpenMode(mode));
 	        Directory[] directories = obtainPartialIndex(Paths.get(indexPath),j);
 	        new File(folderIndex).mkdir();
-	        Directory dir = FSDirectory.open(Paths.get(folderIndex)); 
-	        IndexWriter indexWriter = new IndexWriter(dir, iwc);
+	        IndexWriter indexWriter = getIndexWriter(folderIndex, mode);
 	        indexWriter.addIndexes(directories);
 	        indexWriter.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	private static void onlyMultiThreadIndexing(String indexPath, String path , String mode) {
+		int nFolders = new File(path).listFiles().length;	// threads number
+		IndexWriter indexWriter = getIndexWriter(indexPath, mode);
+		//throughtThreads(nFolders, Paths.get(path), indexWriter);
+		ThreadPool.Pool(nFolders, Paths.get(path), indexWriter);
+		try {
+			indexWriter.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	private static void addAndMultiThreadIndexing(String indexPath, String path , String mode) {
+		int nFolders = new File(path).listFiles().length;
+		ArrayList<IndexWriter> indexs = ThreadPool.Pool(nFolders, Paths.get(path), indexPath, mode);
+		for (int i = 0; i < indexs.size(); i++) {
+			try {
+				indexs.get(i).close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		String folderIndex = indexPath+"\\FinalIndex";
+        Directory[] directories;
+		try {
+			directories = obtainPartialIndex(Paths.get(indexPath),nFolders);
+			new File(folderIndex).mkdir();
+	        IndexWriter indexWriter = getIndexWriter(folderIndex, mode);
+	        indexWriter.addIndexes(directories);
+	        indexWriter.close();
+		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -133,10 +186,10 @@ public class IndexFiles {
 	        		String[] parts = file.toString().split(Pattern.quote(File.separator));
 	        		String folder= parts[parts.length-1]; 
 	        		String newFolder = indexPath+"\\"+folder;
-	        		boolean newFile = new File(newFolder).mkdir();
-	        		if (newFile) {
-	        			simpleIndexing(newFolder, file.toString(), mode);
-	        		}
+	        		new File(newFolder).mkdir();
+        			IndexWriter indexWriter = getIndexWriter(newFolder, mode);
+        			simpleIndexing(file.toString(), indexWriter);
+        			indexWriter.close();
 				}
 			}
 		}
@@ -169,15 +222,13 @@ public class IndexFiles {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		// THREAD
-		Thread thread = Thread.currentThread();
 		List<List<String>> data = Reuters21578Parser.parseString(strBuffer);
 		Iterator<List<String>> it1 = data.iterator();
 		while(it1.hasNext()) {
 			List<String> fields = it1.next();
 			try {
 				article = listArticle(fields, file.toString(),
-						InetAddress.getLocalHost().getHostName(), thread.toString(), article);
+						InetAddress.getLocalHost().getHostName(), Thread.currentThread().getId(), article);
 				indexDoc(writer, article);
 			} catch (UnknownHostException e) {
 				// TODO Auto-generated catch block
@@ -186,7 +237,7 @@ public class IndexFiles {
 		}
 	}
 	
-	private static Article listArticle(List<String> tags, String path, String hostname, String thread,Article article) {
+	private static Article listArticle(List<String> tags, String path, String hostname, long thread,Article article) {
 		article = new Article(tags.get(0), tags.get(2), tags.get(1), 
 			DateTools.dateToString(Utils.formatDate(tags.get(4)), Resolution.MILLISECOND), 
 			tags.get(3), tags.get(5).toString(), tags.get(6).toString(), path, hostname, thread);
@@ -209,7 +260,7 @@ public class IndexFiles {
 			Field hostName = new StringField("Hostname",article.getHostname(),  Field.Store.YES);
 			doc.add(hostName);
 			//INDEXAMOS EL THREAD
-			Field currentThread = new StringField("Thread", article.getThread(),  Field.Store.YES);
+			Field currentThread = new StringField("Thread", String.valueOf(article.getThread()),  Field.Store.YES);
 			doc.add(currentThread);
 			doc.add(new Field("Title",article.getTitle(), type));
 			doc.add(new Field("Body",article.getBody(), type));

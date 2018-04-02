@@ -96,6 +96,7 @@ public class App {
 		indexPath = "C:\\Users\\yeraymendez\\Desktop\\Pruebass2";
 		//docsPath = "C:\\Users\\yeraymendez\\Desktop\\Practica";
 		docsPath = "C:\\Users\\yeraymendez\\Desktop\\dos";
+		//multiThreadMode = true;
 		//indexFile = "C:\\Users\\yeraymendez\\Desktop\\Pruebass";
 		addIndexesMode = true;
 		//field = "Title";	//Topics, Body, Dateline, Date, Title
