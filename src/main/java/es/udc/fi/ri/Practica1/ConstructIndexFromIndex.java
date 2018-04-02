@@ -119,7 +119,37 @@ public class ConstructIndexFromIndex {
 		delDocs(indexFolder,indexOut,null, null, query);
 	}
 
-	public static void summaries(String indexFolder, String indexOut) {
+	public static void makeSummaries(String indexFolder,String indexOut, boolean multiThread, int n) {
+		
+		if (multiThread) {
+			if (n<=0) {
+				System.out.println("More threads are needed");
+			} else {
+				multiThreadSummaries(indexFolder, indexOut, n);
+			}
+		} else {
+			summaries(indexFolder,indexOut);
+		}
+	}
+	
+	private static void multiThreadSummaries(String indexFolder, String indexOut, int n) {
+		Analyzer analyzer = new StandardAnalyzer();
+		IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
+		Directory dir2;
+		try {
+			dir2 = FSDirectory.open(Paths.get(indexOut));//abre ruta para almacenar los indices
+			IndexReader indexReader = DirectoryReader.open(FSDirectory.open(Paths.get(indexFolder)));
+			IndexWriter indexWriter = new IndexWriter(dir2, iwc);	
+			ThreadPool.Pool(n, indexReader, indexWriter);
+			indexReader.close();
+			indexWriter.close();			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+	}
+	
+	private static void summaries(String indexFolder, String indexOut) {
 		IndexReader indexReader = null;
 		IndexWriter indexWriter = null;
 		Analyzer analyzer = new StandardAnalyzer();
@@ -186,8 +216,7 @@ public class ConstructIndexFromIndex {
 		return directory;
 	}
 	
-
-	private static void addSummary(IndexWriter indexWriter, Document doc, String summary) {
+	public static void addSummary(IndexWriter indexWriter, Document doc, String summary) {
 		FieldType type = new FieldType();
 		type.setIndexOptions(IndexOptions.DOCS_AND_FREQS_AND_POSITIONS_AND_OFFSETS);
 		type.setStored(true);
@@ -204,7 +233,7 @@ public class ConstructIndexFromIndex {
 		};
 	}
 	
-	private static String extractMostSimilarPhrases(Document document,String title,String body) {
+	public static String extractMostSimilarPhrases(Document document,String title,String body) {
 		Directory dir = createIndex(body);
 		TopDocs topDocs = null;
 		ArrayList<String> fields = new ArrayList<>();

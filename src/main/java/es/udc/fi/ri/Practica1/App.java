@@ -92,16 +92,16 @@ public class App {
 			}
 		}
 		//POR COMODIDAD LOS INICIALIZARÉ MANUALMENTE
-		openMode = "CREATE";
-		indexPath = "C:\\Users\\yeraymendez\\Desktop\\Pruebass2";
+		//openMode = "CREATE";
+		//indexPath = "C:\\Users\\yeraymendez\\Desktop\\Pruebass2";
 		//docsPath = "C:\\Users\\yeraymendez\\Desktop\\Practica";
-		docsPath = "C:\\Users\\yeraymendez\\Desktop\\dos";
-		//multiThreadMode = true;
-		//indexFile = "C:\\Users\\yeraymendez\\Desktop\\Pruebass";
-		addIndexesMode = true;
+		//docsPath = "C:\\Users\\yeraymendez\\Desktop\\dos";
+		multiThreadMode = true;
+		indexFile = "C:\\Users\\yeraymendez\\Desktop\\Pruebass";
+		//addIndexesMode = true;
 		//field = "Title";	//Topics, Body, Dateline, Date, Title
 		//term = "CANADA";
-		//n = 5;
+		n = 5;
 		//docId = 1;
 		//field = "Title";
 		//pathSgm = "C:\\Users\\yeraymendez\\Desktop\\uNA\\reut2-021.sgm";
@@ -109,8 +109,8 @@ public class App {
 		//newId = "21001";
 		//ord = 0;
 		//term = "abe";
-		//summariesMode = true;
-		//indexOut = "C:\\Users\\yeraymendez\\Desktop\\Pruebass3";
+		summariesMode = true;
+		indexOut = "C:\\Users\\yeraymendez\\Desktop\\Pruebass3";
 		try {
 			if (indexPath !=null && openMode != null && docsPath != null) {
 				//System.err.println("Usage: " + usage);
@@ -131,9 +131,9 @@ public class App {
 				ConstructIndexFromIndex.delDocsQuery(indexFile, indexOut, query);
 			}else if (summariesMode == true) {
 				if (indexFile != null && indexOut != null) {
-					ConstructIndexFromIndex.summaries(indexFile, indexOut);
+					ConstructIndexFromIndex.makeSummaries(indexFile, indexOut, multiThreadMode, n);
 				}else {
-					throw new Exception("0ne of the routes has not been specified for summaries");
+					throw new Exception("One of the routes has not been specified for summaries");
 				}
 			}
 		} catch (Exception e) {

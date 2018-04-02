@@ -16,6 +16,4 @@ public class IndexerThread implements Runnable{
 	public void run() {
 		IndexFiles.simpleIndexing(this.path, this.indexWriter);	
 	}
-	
-	
 }

@@ -9,6 +9,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 
+import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 
 public class ThreadPool {
@@ -55,6 +56,30 @@ public class ThreadPool {
 		while (!executor.isTerminated()) {
 		}
 		return index;
+	}
+	
+	public static void Pool(int numThreads,IndexReader indexReader, IndexWriter indexWriter) {
+		// Creamos x Threads
+		ExecutorService executor = Executors.newFixedThreadPool(numThreads);
+		int numDocs = indexReader.numDocs();
+		int docsByThread = (numDocs/numThreads)-1;
+		int init = 0;
+		int end = numDocs;
+		int next = docsByThread;
+		for (int i = 0;  i< numThreads; i++) {
+			if (i == numThreads-1) {
+				Runnable thread = new ProcessedThread(indexReader, indexWriter, init, end);
+				executor.execute(thread);
+			} else {
+				Runnable thread =  new ProcessedThread(indexReader, indexWriter, init, next);
+				executor.execute(thread);
+			}
+			init = next;
+			next += docsByThread;
+		}		
+		executor.shutdown();
+		while (!executor.isTerminated()) {
+		}
 	}
 	
 }
