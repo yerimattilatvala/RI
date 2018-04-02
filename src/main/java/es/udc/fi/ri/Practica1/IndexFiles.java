@@ -84,6 +84,7 @@ public class IndexFiles {
 	    }
 	    try {
 	    	int j = indexBySubFolders(docDir, mode, indexPath);
+	    	System.out.println(j);
 			String folderIndex = indexPath+"\\FinalIndex";
 			//abre ruta para almacenar los indices
 	        Analyzer analyzer = new StandardAnalyzer(); //analizador
@@ -92,7 +93,6 @@ public class IndexFiles {
 	        Directory[] directories = obtainPartialIndex(Paths.get(indexPath),j);
 	        new File(folderIndex).mkdir();
 	        Directory dir = FSDirectory.open(Paths.get(folderIndex)); 
-	        System.out.println("INDICE ->"+folderIndex);
 	        IndexWriter indexWriter = new IndexWriter(dir, iwc);
 	        indexWriter.addIndexes(directories);
 	        indexWriter.close();
@@ -110,13 +110,11 @@ public class IndexFiles {
 		int i = 0;
 		if (Files.isDirectory(path)) {
 			File[] files = new File(path.toString()).listFiles();
-			/*for (int j = 0; j < files.length; j++) {
-				System.out.println(files[j]);
-			}
-			System.out.println("---------------");*/
 			for (File file : files) {
-				if (file.isDirectory()) {
-	        		System.out.println(file.toString());
+				String[] parts = file.toString().split(Pattern.quote(File.separator));
+        		String folder= parts[parts.length-1]; 
+				if (file.isDirectory() && !folder.equals("FinalIndex")) {
+					System.out.println(file.toString());
 	        		directories[i] = FSDirectory.open(file.toPath());
 	        		i++;
 	        	}
@@ -129,19 +127,12 @@ public class IndexFiles {
 		int i = 0;
 		if (Files.isDirectory(path)) {
 			File[] files = new File(path.toString()).listFiles();
-			for (int j = 0; j < files.length; j++) {
-				System.out.println(files[j]);
-			}
-			System.out.println("********");
 			for (File file : files) {
 				if (file.isDirectory()) {
 					i++;
-	        		//System.out.println(file.toString());
 	        		String[] parts = file.toString().split(Pattern.quote(File.separator));
 	        		String folder= parts[parts.length-1]; 
-	        		//System.out.println(folder);
 	        		String newFolder = indexPath+"\\"+folder;
-	        		System.out.println("NEWFOLDER->"+newFolder);
 	        		boolean newFile = new File(newFolder).mkdir();
 	        		if (newFile) {
 	        			simpleIndexing(newFolder, file.toString(), mode);
