@@ -43,7 +43,7 @@ import org.apache.lucene.util.BytesRef;
 public class ConstructIndexFromIndex {
 
 	// funcion que realiza la logica de deldocsterm y deldocsquery
-	private static long delDocs(String indexFolder, String indexOut,String field,String term, String query) {
+	private static void delDocs(String indexFolder, String indexOut,String field,String term, String query) {
 		IndexWriter indexWriter = null;
 		Analyzer analyzer = null;
 		IndexWriterConfig iwc = null;
@@ -60,17 +60,13 @@ public class ConstructIndexFromIndex {
 			dir = FSDirectory.open(Paths.get(indexFolder)); //abre ruta donde esta el indice
 			indexWriter = new IndexWriter(dir,iwc);
 			if (field != null && term != null) {
-				numDocsDelete = indexWriter.deleteDocuments(new Term(field,term));
+				indexWriter.deleteDocuments(new Term(field,term));
 			} else if (query != null) {
 				fields = getFields(dir);
 				for (String f : fields) {
 					parser = new QueryParser(f, analyzer);
 					queryAux = parser.parse(query);
-					numDocsDelete = indexWriter.deleteDocuments(queryAux);
-					System.out.println("---------------");
-					System.out.println("-Field = "+f);
-					System.out.println("-Deleted Documents = "+ numDocsDelete);
-					System.out.println("---------------");
+					indexWriter.deleteDocuments(queryAux);
 				}
 			}
 			indexWriter.close();
@@ -81,7 +77,6 @@ public class ConstructIndexFromIndex {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}			
-		return numDocsDelete;
 	}
 
 	private static ArrayList<String> getFields(Directory indexFolder) {
@@ -107,10 +102,9 @@ public class ConstructIndexFromIndex {
 	}
 	
 	public static void delDocsTerm(String indexFolder,String indexOut, String field, String term) {
-		long numDocsDelete = delDocs(indexFolder, indexOut,field, term, null);
+		delDocs(indexFolder, indexOut,field, term, null);
 		System.out.println("-Field = "+field);
 		System.out.println("-Term = "+term);
-		System.out.println("-Deleted Documents = "+ numDocsDelete);
 	}
 	
 	public static void delDocsQuery(String indexFolder,String indexOut,String query) {
@@ -161,7 +155,7 @@ public class ConstructIndexFromIndex {
 		String[] phraseBody = null;
 		String summary = null;
 		
-		iwc.setOpenMode(OpenMode.CREATE);
+		iwc.setOpenMode(OpenMode.CREATE_OR_APPEND);
 		
 		try {
 			Directory dir2 = FSDirectory.open(Paths.get(indexOut)); //abre ruta para almacenar los indices
@@ -170,7 +164,7 @@ public class ConstructIndexFromIndex {
 			for (int i = 0; i < indexReader.numDocs(); i++) {
 				doc = indexReader.document(i);
 				body = doc.get("Body");
-				phraseBody = body.split("\\.\n");
+				phraseBody = body.split("\\.");
 				title = doc.get("Title");
 				if (body.equals("")) {
 					summary = "";
@@ -202,7 +196,7 @@ public class ConstructIndexFromIndex {
 		IndexWriter writer;
 		try {
 			writer = new IndexWriter(directory, iwc);
-			String[] f = body.split("\\.\n");
+			String[] f = body.split("\\.");
 			for (int i = 0; i < f.length; i++) {
 				Document doc = new Document();
 				doc.add(new Field("Body",f[i],type));

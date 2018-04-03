@@ -18,6 +18,7 @@ public class App {
 		String openMode = null;	// open mode
 		Boolean multiThreadMode = false;
 		Boolean addIndexesMode = false;
+		Boolean indexando = false;
 		//PROCESADO
 		String indexFile = null;
 		String field = null;
@@ -28,6 +29,7 @@ public class App {
 		int ord = -1;
 		int n = 0;
 		//CONSTRUCCION/BORRADO/RESUME
+		Boolean borrando = false;
 		String indexOut = null;
 		String query = null;
 		Boolean summariesMode = false;
@@ -36,6 +38,7 @@ public class App {
 			switch (args[i]) {
 			// OPCIONES DE INDEXACION
 			case "-openmode":
+				indexando = true;
 				openMode = args[i+1];
 				break;
 			case "-index":
@@ -55,19 +58,23 @@ public class App {
 				indexFile = args[i+1];
 				break;
 			case "-best_idfterms":
+				indexando = false;
 				field = args[i+1];
 				n =  Integer.parseInt(args[i+2]);
 				break;
 			case "-tfpos":
+				indexando = false;
 				field = args[i+1];
 				term = args[i+2];
 				break;
 			case "-termstfpos1":		//termstfpos1 docid field ord
+				indexando = false;
 				docId = Integer.parseInt(args[i+1]);
 				field = args[i+2];
 				ord = Integer.parseInt(args[i+3]);
 				break;
 			case "-termstfpos2":
+				indexando = false;
 				pathSgm = args[i+1];
 				newId = args[i+2];
 				field = args[i+3];
@@ -78,13 +85,19 @@ public class App {
 				indexOut = args[i+1];
 				break;
 			case "-deldocsterm":
+				borrando = true;
+				indexando = false;
 				field = args[i+1];
 				term = args[i+2];
 				break;
 			case "-deldocsquery":
+				borrando = true;
+				indexando = false;
 				query = args[i+1];
 				break;
 			case "-summaries":
+				borrando = false;
+				indexando = false;
 				summariesMode = true;
 				break;
 			default:
@@ -96,12 +109,12 @@ public class App {
 		//indexPath = "C:\\Users\\yeraymendez\\Desktop\\Pruebass2";
 		//docsPath = "C:\\Users\\yeraymendez\\Desktop\\Practica";
 		//docsPath = "C:\\Users\\yeraymendez\\Desktop\\dos";
-		multiThreadMode = true;
-		indexFile = "C:\\Users\\yeraymendez\\Desktop\\Pruebass";
+		//multiThreadMode = true;
+		//indexFile = "C:\\Users\\yeraymendez\\Desktop\\Pruebass";
 		//addIndexesMode = true;
 		//field = "Title";	//Topics, Body, Dateline, Date, Title
 		//term = "CANADA";
-		n = 5;
+		//n = 5;
 		//docId = 1;
 		//field = "Title";
 		//pathSgm = "C:\\Users\\yeraymendez\\Desktop\\uNA\\reut2-021.sgm";
@@ -109,10 +122,66 @@ public class App {
 		//newId = "21001";
 		//ord = 0;
 		//term = "abe";
-		summariesMode = true;
-		indexOut = "C:\\Users\\yeraymendez\\Desktop\\Pruebass3";
+		//summariesMode = true;
+		//indexOut = "C:\\Users\\yeraymendez\\Desktop\\Pruebass3";
 		try {
-			if (indexPath !=null && openMode != null && docsPath != null) {
+			if (indexando) {
+				if (indexPath !=null && openMode != null && docsPath != null) {
+					IndexFiles.Indexer(indexPath,docsPath ,openMode,addIndexesMode,multiThreadMode);
+				}
+			} else {
+				if (borrando) {
+					if (indexFile != null && field !=null && term != null ) {
+						ConstructIndexFromIndex.delDocsTerm(indexFile, indexOut,field, term);
+					}else if (indexFile !=null && query != null) {
+						ConstructIndexFromIndex.delDocsQuery(indexFile, indexOut, query);
+					}
+				} else {
+					if (summariesMode == true) {
+						if (indexFile != null && indexOut != null) {
+							ConstructIndexFromIndex.makeSummaries(indexFile, indexOut, multiThreadMode, n);
+						}else {
+							throw new Exception("One of the routes has not been specified for summaries");
+						}
+					}
+				}
+				if(indexFile !=null && docId>-1 && field != null && ord>=0) {
+					ProcessIndex.termsTfTerms1(indexFile, docId, field, ord);											
+				}
+				if(indexFile !=null && pathSgm != null  && newId != null && ord>=0) {
+					ProcessIndex.termsTfTerms2(indexFile, pathSgm, newId,field,ord);											
+				}
+				if(indexFile != null && field != null && term != null){
+					//term = term.toLowerCase();
+					ProcessIndex.tfPos(indexFile, field, term);	
+				}
+				if (indexFile != null && field != null && n > 0) {
+					ProcessIndex.bestIdfTerms(indexFile, field, n);	//Fields -> Terms
+				}
+			}
+				/*if (indexFile != null && field != null && n > 0) {
+					ProcessIndex.bestIdfTerms(indexFile, field, n);	//Fields -> Terms
+				} //else if(indexFile != null && field != null && term != null){
+					//term = term.toLowerCase();
+					//.tfPos(indexFile, field, term);		// Fields -> Terms -> Posting Lists
+				/*}*/ /*else if(indexFile !=null && docId>-1 && field != null && ord>=0) {
+					ProcessIndex.termsTfTerms1(indexFile, docId, field, ord);												//termstfpos1
+				}else if(indexFile !=null && pathSgm != null  && newId != null && ord>=0) {
+					ProcessIndex.termsTfTerms2(indexFile, pathSgm, newId,field,ord);												//termstfpos1
+				}else if (indexFile != null && field !=null && term != null ) {
+					ConstructIndexFromIndex.delDocsTerm(indexFile, indexOut,field, term);
+				}else if (indexFile !=null && query != null) {
+					ConstructIndexFromIndex.delDocsQuery(indexFile, indexOut, query);
+				}else if (summariesMode == true) {
+					if (indexFile != null && indexOut != null) {
+						ConstructIndexFromIndex.makeSummaries(indexFile, indexOut, multiThreadMode, n);
+					}else {
+						throw new Exception("One of the routes has not been specified for summaries");
+					}
+				}
+			}*/ 
+			
+			/*if (indexPath !=null && openMode != null && docsPath != null) {
 				//System.err.println("Usage: " + usage);
 			    //System.exit(1);
 				IndexFiles.Indexer(indexPath,docsPath ,openMode,addIndexesMode,multiThreadMode);
@@ -121,7 +190,7 @@ public class App {
 			} //else if(indexFile != null && field != null && term != null){
 				//term = term.toLowerCase();
 				//.tfPos(indexFile, field, term);		// Fields -> Terms -> Posting Lists
-			/*}*/ else if(indexFile !=null && docId>-1 && field != null && ord>=0) {
+			/*}*/ /*else if(indexFile !=null && docId>-1 && field != null && ord>=0) {
 				ProcessIndex.termsTfTerms1(indexFile, docId, field, ord);												//termstfpos1
 			}else if(indexFile !=null && pathSgm != null  && newId != null && ord>=0) {
 				ProcessIndex.termsTfTerms2(indexFile, pathSgm, newId,field,ord);												//termstfpos1
@@ -135,7 +204,7 @@ public class App {
 				}else {
 					throw new Exception("One of the routes has not been specified for summaries");
 				}
-			}
+			}*/
 		} catch (Exception e) {
 			e.printStackTrace();
 		}	    

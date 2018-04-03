@@ -47,6 +47,8 @@ public class ProcessIndex {
 	
 	static void bestIdfTerms(String indexFolder, String field, int n) {
 		try {
+			System.out.println("-----------------------------");
+			System.out.println("- Field : "+ field);
 			ArrayList<TermStats> terms = new ArrayList<>();
 			IndexReader reader = getIndexReader(indexFolder);
 			int numDocs = reader.numDocs();
@@ -71,7 +73,7 @@ public class ProcessIndex {
 			for (int j = 0; j < n; j++)
 				System.out.println("- Order "+(j+1)+" -> Idf : "+ terms.get(j).getIdf() + "  Term : "+ terms.get(j).getTerm());
 			reader.close();
-			
+			System.out.println("-----------------------------");
 		} catch (CorruptIndexException e1) {
 			System.out.println("Graceful message: exception " + e1);
 			e1.printStackTrace();

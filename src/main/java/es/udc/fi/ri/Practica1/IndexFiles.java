@@ -85,9 +85,11 @@ public class IndexFiles {
 	      System.exit(1);
 	    }
 		try {
-			//System.out.println("Indexing to directory '" + indexWriter.getDirectory().toString() + "'...");
-	        indexDocs(indexWriter, docDir);
-	        
+			System.out.println("Indexing to directory '" + indexWriter.getDirectory().toString() + "'...");
+	    	Date start = new Date();
+	    	indexDocs(indexWriter, docDir);
+			Date end = new Date();
+			System.out.println("Time = "+ String.valueOf(end.getTime() - start.getTime()) + " total milliseconds");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -167,7 +169,6 @@ public class IndexFiles {
 				String[] parts = file.toString().split(Pattern.quote(File.separator));
         		String folder= parts[parts.length-1]; 
 				if (file.isDirectory() && !folder.equals("FinalIndex")) {
-					System.out.println(file.toString());
 	        		directories[i] = FSDirectory.open(file.toPath());
 	        		i++;
 	        	}
@@ -273,10 +274,10 @@ public class IndexFiles {
 			doc.add(new Field("NewId",article.getNewId(), type));
 	      
 			if (writer.getConfig().getOpenMode() == OpenMode.CREATE) {
-				//System.out.println("adding " + article.getPath());
+				System.out.println("adding " + article.getPath());
 				writer.addDocument(doc);
 			} else {
-				//System.out.println("updating " + article.getPath());
+				System.out.println("updating " + article.getPath());
 				writer.updateDocument(new Term("path", article.getPath()), doc);
 			}
 	    } catch (Exception e) {

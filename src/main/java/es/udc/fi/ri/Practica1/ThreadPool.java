@@ -15,13 +15,11 @@ import org.apache.lucene.index.IndexWriter;
 public class ThreadPool {
 
 	public static void Pool(int numThreads, Path path, IndexWriter indexWriter) {
-		// Creamos x Threads
 		ExecutorService executor = Executors.newFixedThreadPool(numThreads);
 		if (Files.isDirectory(path)) {
 			File[] files = new File(path.toString()).listFiles();
 			for (File file : files) {
 				if (file.isDirectory()) {
-					System.out.println(file.toString());
 					Runnable thread = new IndexerThread(file.toString(),indexWriter);
 					executor.execute(thread);
 				}
@@ -33,7 +31,6 @@ public class ThreadPool {
 	}
 	
 	public static ArrayList<IndexWriter> Pool(int numThreads, Path path, String indexPath,String mode) {
-		// Creamos x Threads
 		ExecutorService executor = Executors.newFixedThreadPool(numThreads);
 		ArrayList<IndexWriter> index = new ArrayList<>();
 		if (Files.isDirectory(path)) {
@@ -45,11 +42,9 @@ public class ThreadPool {
 	        		String newFolder = indexPath+"\\"+folder;
 	        		new File(newFolder).mkdir();
         			IndexWriter indexWriter = IndexFiles.getIndexWriter(newFolder, mode);
-        			System.out.println(file.toString());
 					Runnable thread = new IndexerThread(file.toString(),indexWriter);
 					executor.execute(thread);
         			index.add(indexWriter);
-	        		
 				}
 			}
 		}executor.shutdown();
@@ -59,7 +54,6 @@ public class ThreadPool {
 	}
 	
 	public static void Pool(int numThreads,IndexReader indexReader, IndexWriter indexWriter) {
-		// Creamos x Threads
 		ExecutorService executor = Executors.newFixedThreadPool(numThreads);
 		int numDocs = indexReader.numDocs();
 		int docsByThread = (numDocs/numThreads)-1;
