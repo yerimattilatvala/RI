@@ -104,26 +104,6 @@ public class App {
 				break;
 			}
 		}
-		//POR COMODIDAD LOS INICIALIZARÉ MANUALMENTE
-		//openMode = "CREATE";
-		//indexPath = "C:\\Users\\yeraymendez\\Desktop\\Pruebass2";
-		//docsPath = "C:\\Users\\yeraymendez\\Desktop\\Practica";
-		//docsPath = "C:\\Users\\yeraymendez\\Desktop\\dos";
-		//multiThreadMode = true;
-		//indexFile = "C:\\Users\\yeraymendez\\Desktop\\Pruebass";
-		//addIndexesMode = true;
-		//field = "Title";	//Topics, Body, Dateline, Date, Title
-		//term = "CANADA";
-		//n = 5;
-		//docId = 1;
-		//field = "Title";
-		//pathSgm = "C:\\Users\\yeraymendez\\Desktop\\uNA\\reut2-021.sgm";
-		//pathSgm.replaceAll("\\\\", "\\\\\\\\");
-		//newId = "21001";
-		//ord = 0;
-		//term = "abe";
-		//summariesMode = true;
-		//indexOut = "C:\\Users\\yeraymendez\\Desktop\\Pruebass3";
 		try {
 			if (indexando) {
 				if (indexPath !=null && openMode != null && docsPath != null) {
@@ -159,52 +139,6 @@ public class App {
 					ProcessIndex.bestIdfTerms(indexFile, field, n);	//Fields -> Terms
 				}
 			}
-				/*if (indexFile != null && field != null && n > 0) {
-					ProcessIndex.bestIdfTerms(indexFile, field, n);	//Fields -> Terms
-				} //else if(indexFile != null && field != null && term != null){
-					//term = term.toLowerCase();
-					//.tfPos(indexFile, field, term);		// Fields -> Terms -> Posting Lists
-				/*}*/ /*else if(indexFile !=null && docId>-1 && field != null && ord>=0) {
-					ProcessIndex.termsTfTerms1(indexFile, docId, field, ord);												//termstfpos1
-				}else if(indexFile !=null && pathSgm != null  && newId != null && ord>=0) {
-					ProcessIndex.termsTfTerms2(indexFile, pathSgm, newId,field,ord);												//termstfpos1
-				}else if (indexFile != null && field !=null && term != null ) {
-					ConstructIndexFromIndex.delDocsTerm(indexFile, indexOut,field, term);
-				}else if (indexFile !=null && query != null) {
-					ConstructIndexFromIndex.delDocsQuery(indexFile, indexOut, query);
-				}else if (summariesMode == true) {
-					if (indexFile != null && indexOut != null) {
-						ConstructIndexFromIndex.makeSummaries(indexFile, indexOut, multiThreadMode, n);
-					}else {
-						throw new Exception("One of the routes has not been specified for summaries");
-					}
-				}
-			}*/ 
-			
-			/*if (indexPath !=null && openMode != null && docsPath != null) {
-				//System.err.println("Usage: " + usage);
-			    //System.exit(1);
-				IndexFiles.Indexer(indexPath,docsPath ,openMode,addIndexesMode,multiThreadMode);
-			} else if (indexFile != null && field != null && n > 0) {
-				ProcessIndex.bestIdfTerms(indexFile, field, n);	//Fields -> Terms
-			} //else if(indexFile != null && field != null && term != null){
-				//term = term.toLowerCase();
-				//.tfPos(indexFile, field, term);		// Fields -> Terms -> Posting Lists
-			/*}*/ /*else if(indexFile !=null && docId>-1 && field != null && ord>=0) {
-				ProcessIndex.termsTfTerms1(indexFile, docId, field, ord);												//termstfpos1
-			}else if(indexFile !=null && pathSgm != null  && newId != null && ord>=0) {
-				ProcessIndex.termsTfTerms2(indexFile, pathSgm, newId,field,ord);												//termstfpos1
-			}else if (indexFile != null && field !=null && term != null ) {
-				ConstructIndexFromIndex.delDocsTerm(indexFile, indexOut,field, term);
-			}else if (indexFile !=null && query != null) {
-				ConstructIndexFromIndex.delDocsQuery(indexFile, indexOut, query);
-			}else if (summariesMode == true) {
-				if (indexFile != null && indexOut != null) {
-					ConstructIndexFromIndex.makeSummaries(indexFile, indexOut, multiThreadMode, n);
-				}else {
-					throw new Exception("One of the routes has not been specified for summaries");
-				}
-			}*/
 		} catch (Exception e) {
 			e.printStackTrace();
 		}	    

@@ -69,6 +69,8 @@ public class ConstructIndexFromIndex {
 					indexWriter.deleteDocuments(queryAux);
 				}
 			}
+			indexWriter.forceMergeDeletes();
+			indexWriter.commit();
 			indexWriter.close();
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
@@ -133,6 +135,7 @@ public class ConstructIndexFromIndex {
 		try {
 			dir2 = FSDirectory.open(Paths.get(indexOut));//abre ruta para almacenar los indices
 			IndexReader indexReader = DirectoryReader.open(FSDirectory.open(Paths.get(indexFolder)));
+			iwc.setOpenMode(OpenMode.CREATE);
 			IndexWriter indexWriter = new IndexWriter(dir2, iwc);	
 			ThreadPool.Pool(n, indexReader, indexWriter);
 			indexReader.close();
@@ -155,7 +158,7 @@ public class ConstructIndexFromIndex {
 		String[] phraseBody = null;
 		String summary = null;
 		
-		iwc.setOpenMode(OpenMode.CREATE_OR_APPEND);
+		iwc.setOpenMode(OpenMode.CREATE);
 		
 		try {
 			Directory dir2 = FSDirectory.open(Paths.get(indexOut)); //abre ruta para almacenar los indices
