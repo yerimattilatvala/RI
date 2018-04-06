@@ -61,6 +61,8 @@ public class ThreadPool {
 		int end = numDocs;
 		int next = docsByThread;
 		for (int i = 0;  i< numThreads; i++) {
+			//System.out.println("INIT ->"+init);
+			//System.out.println("FIN ->"+next);
 			if (i == numThreads-1) {
 				Runnable thread = new ProcessedThread(indexReader, indexWriter, init, end);
 				executor.execute(thread);

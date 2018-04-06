@@ -39,7 +39,7 @@ public class ProcessedThread implements Runnable{
 				String body = doc.get("Body");
 				String[] phraseBody = body.split("\\.\n");
 				String title = doc.get("Title");
-				System.out.println(Thread.currentThread().getId());
+				//System.out.println(Thread.currentThread().getId());
 				if (body.equals("")) {
 					summary = "";
 				} else if (title.equals("")) {

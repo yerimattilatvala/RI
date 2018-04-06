@@ -50,6 +50,10 @@ public class App {
 			case "-multithread":
 				multiThreadMode = true;
 				break;
+			case "-multithreadS":
+				multiThreadMode = true;
+				n = Integer.parseInt(args[i+1]);
+				break;
 			// OPCIONES DE PROCESADO DE INDICE CONTRUIDO
 			case "-addindexes":
 				addIndexesMode = true;
