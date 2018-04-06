@@ -51,6 +51,7 @@ public class IndexFiles {
 			IndexWriter indexWriter = getIndexWriter(indexPath, mode);
 			simpleIndexing(path, indexWriter);
 			try {
+				indexWriter.commit();
 				indexWriter.close();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -112,6 +113,7 @@ public class IndexFiles {
 	        new File(folderIndex).mkdir();
 	        IndexWriter indexWriter = getIndexWriter(folderIndex, mode);
 	        indexWriter.addIndexes(directories);
+	        indexWriter.commit();
 	        indexWriter.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -128,6 +130,7 @@ public class IndexFiles {
 		//throughtThreads(nFolders, Paths.get(path), indexWriter);
 		ThreadPool.Pool(nFolders, Paths.get(path), indexWriter);
 		try {
+			indexWriter.commit();
 			indexWriter.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -140,6 +143,7 @@ public class IndexFiles {
 		ArrayList<IndexWriter> indexs = ThreadPool.Pool(nFolders, Paths.get(path), indexPath, mode);
 		for (int i = 0; i < indexs.size(); i++) {
 			try {
+				indexs.get(i).commit();
 				indexs.get(i).close();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -153,6 +157,7 @@ public class IndexFiles {
 			new File(folderIndex).mkdir();
 	        IndexWriter indexWriter = getIndexWriter(folderIndex, mode);
 	        indexWriter.addIndexes(directories);
+	        indexWriter.commit();
 	        indexWriter.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -190,6 +195,7 @@ public class IndexFiles {
 	        		new File(newFolder).mkdir();
         			IndexWriter indexWriter = getIndexWriter(newFolder, mode);
         			simpleIndexing(file.toString(), indexWriter);
+        			indexWriter.commit();
         			indexWriter.close();
 				}
 			}

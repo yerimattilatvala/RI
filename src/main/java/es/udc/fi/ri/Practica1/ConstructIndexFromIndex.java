@@ -43,7 +43,7 @@ import org.apache.lucene.util.BytesRef;
 public class ConstructIndexFromIndex {
 
 	// funcion que realiza la logica de deldocsterm y deldocsquery
-	private static void delDocs(String indexFolder, String indexOut,String field,String term, String query) {
+	private static void delDocs(String indexFolder,String field,String term, String query) {
 		IndexWriter indexWriter = null;
 		Analyzer analyzer = null;
 		IndexWriterConfig iwc = null;
@@ -60,7 +60,7 @@ public class ConstructIndexFromIndex {
 			dir = FSDirectory.open(Paths.get(indexFolder)); //abre ruta donde esta el indice
 			indexWriter = new IndexWriter(dir,iwc);
 			if (field != null && term != null) {
-				indexWriter.deleteDocuments(new Term(field,term));
+				numDocsDelete = indexWriter.deleteDocuments(new Term(field,term));
 			} else if (query != null) {
 				fields = getFields(dir);
 				for (String f : fields) {
@@ -69,8 +69,9 @@ public class ConstructIndexFromIndex {
 					indexWriter.deleteDocuments(queryAux);
 				}
 			}
-			indexWriter.forceMergeDeletes();
+			indexWriter.forceMergeDeletes(true);
 			indexWriter.commit();
+			indexWriter.flush();
 			indexWriter.close();
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
@@ -103,16 +104,16 @@ public class ConstructIndexFromIndex {
 		return fieldList;		
 	}
 	
-	public static void delDocsTerm(String indexFolder,String indexOut, String field, String term) {
-		delDocs(indexFolder, indexOut,field, term, null);
+	public static void delDocsTerm(String indexFolder,String field, String term) {
 		System.out.println("-Field = "+field);
 		System.out.println("-Term = "+term);
+		delDocs(indexFolder,field, term, null);
 	}
 	
-	public static void delDocsQuery(String indexFolder,String indexOut,String query) {
+	public static void delDocsQuery(String indexFolder,String query) {
 		System.out.println("");
 		System.out.println("-Query = "+query);
-		delDocs(indexFolder,indexOut,null, null, query);
+		delDocs(indexFolder,null, null, query);
 	}
 
 	public static void makeSummaries(String indexFolder,String indexOut, boolean multiThread, int n) {

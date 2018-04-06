@@ -19,6 +19,7 @@ public class App {
 		Boolean multiThreadMode = false;
 		Boolean addIndexesMode = false;
 		Boolean indexando = false;
+		Boolean tfpos = false;
 		//PROCESADO
 		String indexFile = null;
 		String field = null;
@@ -67,9 +68,10 @@ public class App {
 				n =  Integer.parseInt(args[i+2]);
 				break;
 			case "-tfpos":
+				tfpos = true;
 				indexando = false;
 				field = args[i+1];
-				term = args[i+2];
+				term = args[i+2].toLowerCase();
 				break;
 			case "-termstfpos1":		//termstfpos1 docid field ord
 				indexando = false;
@@ -92,7 +94,7 @@ public class App {
 				borrando = true;
 				indexando = false;
 				field = args[i+1];
-				term = args[i+2];
+				term = args[i+2].toLowerCase();
 				break;
 			case "-deldocsquery":
 				borrando = true;
@@ -109,6 +111,7 @@ public class App {
 			}
 		}
 		try {
+			System.out.println();
 			if (indexando) {
 				if (indexPath !=null && openMode != null && docsPath != null) {
 					IndexFiles.Indexer(indexPath,docsPath ,openMode,addIndexesMode,multiThreadMode);
@@ -116,9 +119,9 @@ public class App {
 			} else {
 				if (borrando) {
 					if (indexFile != null && field !=null && term != null ) {
-						ConstructIndexFromIndex.delDocsTerm(indexFile, indexOut,field, term);
+						ConstructIndexFromIndex.delDocsTerm(indexFile,field, term);
 					}else if (indexFile !=null && query != null) {
-						ConstructIndexFromIndex.delDocsQuery(indexFile, indexOut, query);
+						ConstructIndexFromIndex.delDocsQuery(indexFile, query);
 					}
 				} else {
 					if (summariesMode == true) {
@@ -135,9 +138,10 @@ public class App {
 				if(indexFile !=null && pathSgm != null  && newId != null && ord>=0) {
 					ProcessIndex.termsTfTerms2(indexFile, pathSgm, newId,field,ord);											
 				}
-				if(indexFile != null && field != null && term != null){
-					//term = term.toLowerCase();
-					ProcessIndex.tfPos(indexFile, field, term);	
+				if (tfpos) {
+					if(indexFile != null && field != null && term != null){
+						ProcessIndex.tfPos(indexFile, field, term);	
+					}
 				}
 				if (indexFile != null && field != null && n > 0) {
 					ProcessIndex.bestIdfTerms(indexFile, field, n);	//Fields -> Terms
