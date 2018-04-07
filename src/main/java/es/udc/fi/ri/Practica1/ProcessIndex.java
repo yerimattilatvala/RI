@@ -98,26 +98,32 @@ public class ProcessIndex {
 			int df = 0;
 			df = indexReader.docFreq(termAux);
 			dataTerm = MultiFields.getTermDocsEnum(indexReader, field, bytes,PostingsEnum.ALL);
-			while (dataTerm.nextDoc() != DocIdSetIterator.NO_MORE_DOCS) {
-				int docId = dataTerm.docID();
-				int pos = dataTerm.nextPosition();
-				doc = indexReader.document(docId);
-				System.out.println("-------------------------------------");
-				System.out.println("DocId = " + docId);
-				System.out.println("PathSgm = " + doc.get("PathSgm"));
-				System.out.println("OldId = " + doc.get("OldId"));
-				System.out.println("NewId = " + doc.get("NewId"));
-				System.out.println("Title = " + doc.get("Title"));
-				System.out.println("["+term+"] frequency in this document = " + dataTerm.freq()+" .");	//frecuencia en el documento actual
-				System.out.println("Number the documents that contain the ["+term+"] = "+df+" .");	//frecuencia del termino
-				System.out.println("Position of ["+term+"] = " + pos+" .");	//posicion
-				System.out.println("-------------------------------------");
+			if (dataTerm == null) {
+				throw new Exception("For "+field+" and "+term+" don´t search hits");
+			} else {
+				while (dataTerm.nextDoc() != DocIdSetIterator.NO_MORE_DOCS) {
+					int docId = dataTerm.docID();
+					int pos = dataTerm.nextPosition();
+					doc = indexReader.document(docId);
+					System.out.println("-------------------------------------");
+					System.out.println("DocId = " + docId);
+					System.out.println("PathSgm = " + doc.get("PathSgm"));
+					System.out.println("OldId = " + doc.get("OldId"));
+					System.out.println("NewId = " + doc.get("NewId"));
+					System.out.println("Title = " + doc.get("Title"));
+					System.out.println("["+term+"] frequency in this document = " + dataTerm.freq()+" .");	//frecuencia en el documento actual
+					System.out.println("Number the documents that contain the ["+term+"] = "+df+" .");	//frecuencia del termino
+					System.out.println("Position of ["+term+"] = " + pos+" .");	//posicion
+					System.out.println("-------------------------------------");
+				}
+				indexReader.close();
 			}
-			indexReader.close();
-			
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 

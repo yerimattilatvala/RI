@@ -53,10 +53,11 @@ public class ConstructIndexFromIndex {
 		QueryParser parser = null;
 		Query queryAux = null;
 		
-		analyzer = new StandardAnalyzer();
-		iwc = new IndexWriterConfig(analyzer);
-		iwc.setOpenMode(OpenMode.APPEND);
 		try {
+
+			analyzer = new StandardAnalyzer();
+			iwc = new IndexWriterConfig(new StandardAnalyzer());
+			iwc.setOpenMode(OpenMode.APPEND);
 			dir = FSDirectory.open(Paths.get(indexFolder)); //abre ruta donde esta el indice
 			indexWriter = new IndexWriter(dir,iwc);
 			if (field != null && term != null) {
@@ -71,7 +72,6 @@ public class ConstructIndexFromIndex {
 			}
 			indexWriter.forceMergeDeletes(true);
 			indexWriter.commit();
-			indexWriter.flush();
 			indexWriter.close();
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block

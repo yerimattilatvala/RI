@@ -231,7 +231,7 @@ public class IndexFiles {
 		}
 		List<List<String>> data = Reuters21578Parser.parseString(strBuffer);
 		Iterator<List<String>> it1 = data.iterator();
-		while(it1.hasNext()) {
+		while(it1.hasNext()){
 			List<String> fields = it1.next();
 			try {
 				article = listArticle(fields, file.toString(),

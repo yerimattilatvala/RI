@@ -1,5 +1,12 @@
 package es.udc.fi.ri.Practica1;
 
+import java.nio.file.Paths;
+
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.store.FSDirectory;
+
 public class App {
 	public static void main(String[] args) {
 		String usage = "Indexer use "
@@ -111,7 +118,6 @@ public class App {
 			}
 		}
 		try {
-			System.out.println();
 			if (indexando) {
 				if (indexPath !=null && openMode != null && docsPath != null) {
 					IndexFiles.Indexer(indexPath,docsPath ,openMode,addIndexesMode,multiThreadMode);
